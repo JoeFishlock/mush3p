@@ -37,10 +37,15 @@ class PhysicalParams(Protocol):
 @dataclass
 class FullPhysicalParams:
     name: str
-    liquid_density: float = 1028
-    solid_density: float = 998
-    far_salinity: float = 34
-    eutectic_salinity: float = 230
+    liquid_density: float = 1028  # kg/m3
+    solid_density: float = 998  # kg/m3
+    far_salinity: float = 34  # psu (g/kg)
+    eutectic_salinity: float = 230  # psu (g/kg)
+    far_temperature: float = 0.1  # degC
+    initial_temperature: float = -2  # degC
+    eutectic_temperature: float = -21  # deg C
+    latent_heat: float = 333.4e3  # J/kg
+    specific_heat_capacity: float = 4209  # J/kg degC
 
     @property
     def params(self) -> dict:
@@ -66,6 +71,11 @@ class FullPhysicalParams:
     def concentration_ratio(self) -> float:
         salinity_diff = self.eutectic_salinity - self.far_salinity
         return self.far_salinity / salinity_diff
+
+    @property
+    def stefan_number(self) -> float:
+        temperature_diff = self.initial_temperature - self.eutectic_temperature
+        return self.latent_heat / (temperature_diff * self.specific_heat_capacity)
 
     def non_dimensionalise(self) -> FullNonDimensionalParams:
         non_dimensional_params = {
