@@ -46,6 +46,21 @@ class FullPhysicalParams:
     eutectic_temperature: float = -21  # deg C
     latent_heat: float = 333.4e3  # J/kg
     specific_heat_capacity: float = 4209  # J/kg degC
+    hele_shaw_gap_width: float = 1e-2  # m
+    reference_permeability: float = 5.56e-11  # m2
+    nucleation_time_scale: float = 100  # s
+    reference_saturation_concentration: float = 3.71e-5  # kg/kg
+    far_dissolved_gas_concentration: float = 3.71e-5  # kg/kg
+    specific_gas_constant: float = 286  # J/kg degK
+    reference_velocity: float = 3e-6  # m/s
+    bubble_radius: float = 1e-4  # m
+    reference_pore_scale: float = 1e-2  # m
+    gravitational_acceleration: float = 9.81  # m/s2
+    liquid_dynamic_viscosity: float = 1.906e-3  # kg/m s
+    liquid_thermal_conductivity: float = 0.523  # W/m degC
+    gas_thermal_conductivity: float = 2e-2  # W/m degC
+    surface_tension: float = 77.09e-3  # N/m
+    atmospheric_pressure: float = 1.01e5  # Pa
 
     @property
     def params(self) -> dict:
