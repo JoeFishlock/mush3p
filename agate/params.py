@@ -39,6 +39,8 @@ class FullPhysicalParams:
     name: str
     liquid_density: float = 1028
     solid_density: float = 998
+    far_salinity: float = 34
+    eutectic_salinity: float = 230
 
     @property
     def params(self) -> dict:
@@ -59,6 +61,11 @@ class FullPhysicalParams:
         if not os.path.exists(data_path):
             os.makedirs(data_path)
         json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
+
+    @property
+    def concentration_ratio(self) -> float:
+        salinity_diff = self.eutectic_salinity - self.far_salinity
+        return self.far_salinity / salinity_diff
 
     def non_dimensionalise(self) -> FullNonDimensionalParams:
         non_dimensional_params = {
