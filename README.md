@@ -1,6 +1,7 @@
 # Agate #
 
 ## Installation ##
+Using Python 3.9.13
 
 ## Usage ##
 
