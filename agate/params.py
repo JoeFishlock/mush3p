@@ -40,7 +40,6 @@ class PhysicalParams(Protocol):
 class FullPhysicalParams:
     name: str
     liquid_density: float = 1028  # kg/m3
-    solid_density: float = 998  # kg/m3
     far_salinity: float = 34  # psu (g/kg)
     eutectic_salinity: float = 230  # psu (g/kg)
     far_temperature: float = 0.1  # degC
