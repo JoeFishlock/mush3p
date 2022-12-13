@@ -60,6 +60,26 @@ class FullPhysicalParams:
             os.makedirs(data_path)
         json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
 
+    def non_dimensionalise(self) -> FullNonDimensionalParams:
+        non_dimensional_params = {
+            "name": self.name,
+            "concentration_ratio": self.concentration_ratio,
+            "stefan_number": self.stefan_number,
+            "hele_shaw_permeability": self.hele_shaw_permeability,
+            "far_temperature": self.far_temperature,
+            "damkholer_number": self.damkholer_number,
+            "expansion_coefficient": self.expansion_coefficient,
+            "stokes_rise_velocity": self.stokes_rise_velocity,
+            "bubble_radius": self.bubble_radius,
+            "far_concentration": self.far_concentration,
+            "gas_conductivity": self.gas_conductivity,
+            "hydrostatic_pressure": self.hydrostatic_pressure,
+            "laplace_pressure": self.laplace_pressure,
+            "kelvin_conversion_temperature": self.kelvin_conversion_temperature,
+            "atmospheric_pressure": self.atmospheric_pressure,
+        }
+        return FullNonDimensionalParams(**non_dimensional_params)
+
 
 @dataclass
 class FullNonDimensionalParams:
