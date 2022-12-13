@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Protocol
 import os
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from agate.model import Model
 from agate.output import NonDimensionalOutput
 
@@ -102,11 +102,7 @@ class FullPhysicalParams:
 
     @property
     def params(self) -> dict:
-        return {
-            "name": self.name,
-            "liquid_density": self.liquid_density,
-            "solid_density": self.solid_density,
-        }
+        return asdict(self)
 
     @classmethod
     def load(cls, filename: str) -> FullPhysicalParams:
