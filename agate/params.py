@@ -72,18 +72,18 @@ class FullPhysicalParams:
             "name": self.name,
             "concentration_ratio": self.concentration_ratio,
             "stefan_number": self.stefan_number,
-            "hele_shaw_permeability": self.hele_shaw_permeability,
-            "far_temperature": self.far_temperature,
+            "hele_shaw_permeability_scaled": self.hele_shaw_permeability_scaled,
+            "far_temperature_scaled": self.far_temperature_scaled,
             "damkholer_number": self.damkholer_number,
             "expansion_coefficient": self.expansion_coefficient,
-            "stokes_rise_velocity": self.stokes_rise_velocity,
-            "bubble_radius": self.bubble_radius,
-            "far_concentration": self.far_concentration,
-            "gas_conductivity": self.gas_conductivity,
+            "stokes_rise_velocity_scaled": self.stokes_rise_velocity_scaled,
+            "bubble_radius_scaled": self.bubble_radius_scaled,
+            "far_concentration_scaled": self.far_concentration_scaled,
+            "gas_conductivity_ratio": self.gas_conductivity_ratio,
             "hydrostatic_pressure": self.hydrostatic_pressure,
             "laplace_pressure": self.laplace_pressure,
             "kelvin_conversion_temperature": self.kelvin_conversion_temperature,
-            "atmospheric_pressure": self.atmospheric_pressure,
+            "atmospheric_pressure_scaled": self.atmospheric_pressure_scaled,
         }
         return FullNonDimensionalParams(**non_dimensional_params)
 
@@ -95,19 +95,19 @@ class FullNonDimensionalParams:
     # mushy layer params
     concentration_ratio: float
     stefan_number: float
-    hele_shaw_permeability: float
-    far_temperature: float
+    hele_shaw_permeability_scaled: float
+    far_temperature_scaled: float
 
     # gas params
     damkholer_number: float
     expansion_coefficient: float
-    stokes_rise_velocity: float
-    bubble_radius: float
-    far_concentration: float
-    gas_conductivity: float
+    stokes_rise_velocity_scaled: float
+    bubble_radius_scaled: float
+    far_concentration_scaled: float
+    gas_conductivity_ratio: float
 
     # compressible gas params
     hydrostatic_pressure: float
     laplace_pressure: float
     kelvin_conversion_temperature: float
-    atmospheric_pressure: float
+    atmospheric_pressure_scaled: float
