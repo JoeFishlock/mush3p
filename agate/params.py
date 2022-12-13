@@ -59,3 +59,28 @@ class FullPhysicalParams:
         if not os.path.exists(data_path):
             os.makedirs(data_path)
         json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
+
+
+@dataclass
+class FullNonDimensionalParams:
+    name: str
+
+    # mushy layer params
+    concentration_ratio: float
+    stefan_number: float
+    hele_shaw_permeability: float
+    far_temperature: float
+
+    # gas params
+    damkholer_number: float
+    expansion_coefficient: float
+    stokes_rise_velocity: float
+    bubble_radius: float
+    far_concentration: float
+    gas_conductivity: float
+
+    # compressible gas params
+    hydrostatic_pressure: float
+    laplace_pressure: float
+    kelvin_conversion_temperature: float
+    atmospheric_pressure: float
