@@ -1,5 +1,5 @@
 venv/*
 dev/*
-*/__pycache__/*
+**/__pycache__/*
 sandbox.py
 data/*
