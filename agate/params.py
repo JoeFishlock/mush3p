@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from agate.model import Model
 from agate.output import NonDimensionalOutput
 
+CELSIUS_TO_KELVIN = 273.15
+
 
 class NumericalParameters:
     tol: float = 1e-7
@@ -61,6 +63,42 @@ class FullPhysicalParams:
     gas_thermal_conductivity: float = 2e-2  # W/m degC
     surface_tension: float = 77.09e-3  # N/m
     atmospheric_pressure: float = 1.01e5  # Pa
+
+    @property
+    def liquid_thermal_diffusivity(self) -> float:
+        return self.liquid_thermal_conductivity / (
+            self.liquid_density * self.specific_heat_capacity
+        )
+
+    @property
+    def length_scale(self) -> float:
+        return self.liquid_thermal_diffusivity / self.reference_velocity
+
+    @property
+    def time_scale(self) -> float:
+        return self.liquid_thermal_diffusivity / self.reference_velocity**2
+
+    @property
+    def reference_gas_density(self) -> float:
+        return self.atmospheric_pressure / (
+            self.specific_gas_constant * (self.initial_temperature + CELSIUS_TO_KELVIN)
+        )
+
+    @property
+    def stokes_rise_velocity(self) -> float:
+        return (
+            self.liquid_density
+            * self.gravitational_acceleration
+            * self.bubble_radius**2
+        ) / (3 * self.liquid_dynamic_viscosity)
+
+    @property
+    def pressure_scale(self) -> float:
+        return (
+            self.liquid_thermal_diffusivity
+            * self.liquid_dynamic_viscosity
+            / self.reference_permeability
+        )
 
     @property
     def params(self) -> dict:
