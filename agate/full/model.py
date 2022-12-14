@@ -465,8 +465,8 @@ def boundary_conditions_in_mushy_layer(
         height=0,
     )
 
-    return np.vstack(
-        (
+    return np.array(
+        [
             hydrostatic_pressure_at_top,
             temperature_at_top + 1,
             frozen_gas_fraction_at_top
@@ -480,7 +480,7 @@ def boundary_conditions_in_mushy_layer(
             + mushy_layer_depth_at_bottom
             * params.far_temperature_scaled
             * (1 - frozen_gas_fraction_at_bottom),
-        )
+        ]
     )
 
 
