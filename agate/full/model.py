@@ -111,7 +111,10 @@ def calculate_gas_density_in_mushy_layer(
     pressure_term = hydrostatic_pressure / params.atmospheric_pressure_scaled
     laplace_term = params.laplace_pressure_scale / params.atmospheric_pressure_scaled
     depth_term = (
-        -params.hydrostatic_pressure_scale * height * mushy_layer_depth / params.atmospheric_pressure_scaled
+        -params.hydrostatic_pressure_scale
+        * height
+        * mushy_layer_depth
+        / params.atmospheric_pressure_scaled
     )
 
     return temperature_term * (1 + pressure_term + laplace_term + depth_term)
@@ -171,6 +174,13 @@ def calculate_solid_fraction_derivative_in_mushy_layer(
         * temperature_derivative
         / (concentration_ratio - temperature) ** 2
     )
+
+
+def calculate_gas_fraction_derivative_in_mushy_layer(
+    gas_fraction: Array, height: Array
+) -> Array:
+    """Numerically approximate the derivative with finite difference."""
+    return np.gradient(gas_fraction, height)
 
 
 def calculate_frozen_gas_at_top(
