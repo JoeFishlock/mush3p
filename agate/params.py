@@ -26,7 +26,9 @@ class NonDimensionalParams(Protocol):
         ...
 
     def solve(
-        self, numerical_parameters: NumericalParameters, model: Model
+        self,
+        model: Model,
+        numerical_params: NumericalParameters = NumericalParameters(),
     ) -> NonDimensionalOutput:
         ...
 
