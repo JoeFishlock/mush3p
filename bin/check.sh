@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 # This script should be run in the dev virtual environment
 # source dev/bin/activate
@@ -10,21 +10,21 @@
 set -uo pipefail
 
 echo "RUNNING WITH";
-python --version;
-which python;
+python3 --version;
+which python3;
 printf "\n"
 
 echo "RUNNING BLACK";
-eval "python -m black ${1:-agate}";
+eval "python3 -m black ${1:-agate}";
 printf "\n"
 
 echo "RUNNING PYLINT";
-eval "python -m pylint --max-line-length 88 ${1:-agate}";
+eval "python3 -m pylint --max-line-length 88 ${1:-agate}";
 printf "\n"
 
 echo "RUNNING MYPY";
-eval "python -m mypy ${1:-agate}";
+eval "python3 -m mypy ${1:-agate}";
 printf "\n"
 
 echo "RUNNING PYTEST";
-python -m pytest;
+python3 -m pytest;
