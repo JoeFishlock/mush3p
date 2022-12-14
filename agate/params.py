@@ -14,6 +14,17 @@ class NumericalParameters:
 
 
 class NonDimensionalParams(Protocol):
+    @property
+    def params(self) -> Dict[str, Any]:
+        ...
+
+    @classmethod
+    def load(cls, filename: str) -> NonDimensionalParams:
+        ...
+
+    def save(self, filename: str) -> None:
+        ...
+
     def solve(
         self, numerical_parameters: NumericalParameters, model: Model
     ) -> NonDimensionalOutput:
