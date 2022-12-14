@@ -15,6 +15,7 @@ height (vertical coordinate)
 from typing import Union, Any
 import numpy as np
 from scipy.optimize import fsolve  # type: ignore
+from scipy.integrate import solve_bvp
 from numpy.typing import NDArray
 from agate.params import FullNonDimensionalParams
 
@@ -481,3 +482,16 @@ def boundary_conditions_in_mushy_layer(
             * (1 - frozen_gas_fraction_at_bottom),
         )
     )
+
+
+def solve_in_mushy_layer(params: FullNonDimensionalParams) -> tuple[NDArray, NDArray]:
+    sol = solve_bvp(
+        lambda x, y: ode_fun_in_mushy_layer(params=params, height=x, variables=y),
+        lambda ya, yb: boundary_conditions_in_mushy_layer(
+            params=params, variables_at_bottom=ya, variables_at_top=yb
+        ),
+        INITIAL_HEIGHT,
+        INITIAL_VARIABLES,
+        verbose=2,
+    )
+    return sol.x, sol.y
