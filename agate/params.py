@@ -259,3 +259,11 @@ class FullNonDimensionalParams:
         if not os.path.exists(data_path):
             os.makedirs(data_path)
         json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
+
+    def solve(
+        self,
+        model: FullModel,
+        numerical_params: NumericalParams = NumericalParams(),
+    ) -> NonDimensionalOutput:
+        # TODO: implement FullNonDimensionalParams.solve <14-12-22, Joe Fishlock> #
+        pass
