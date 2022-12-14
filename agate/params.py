@@ -9,7 +9,7 @@ from agate.output import NonDimensionalOutput
 CELSIUS_TO_KELVIN = 273.15
 
 
-class NumericalParameters:
+class NumericalParams:
     tol: float = 1e-7
 
 
@@ -28,7 +28,7 @@ class NonDimensionalParams(Protocol):
     def solve(
         self,
         model: Model,
-        numerical_params: NumericalParameters = NumericalParameters(),
+        numerical_params: NumericalParams = NumericalParams(),
     ) -> NonDimensionalOutput:
         ...
 
