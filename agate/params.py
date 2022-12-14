@@ -111,7 +111,7 @@ class FullPhysicalParams:
         )
 
     @property
-    def params(self) -> dict:
+    def params(self) -> Dict[str, Any]:
         return asdict(self)
 
     @classmethod
@@ -241,3 +241,19 @@ class FullNonDimensionalParams:
     laplace_pressure_scale: float
     kelvin_conversion_temperature: float
     atmospheric_pressure_scaled: float
+
+    @property
+    def params(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def load(cls, filename: str) -> FullNonDimensionalParams:
+        data_path = "data"
+        params = json.load(open(f"{data_path}/{filename}.json"))
+        return cls(**params)
+
+    def save(self, filename: str) -> None:
+        data_path = "data"
+        if not os.path.exists(data_path):
+            os.makedirs(data_path)
+        json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
