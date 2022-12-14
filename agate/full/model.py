@@ -104,13 +104,14 @@ def calculate_gas_density_in_mushy_layer(
     params: FullNonDimensionalParams,
     temperature: Array,
     hydrostatic_pressure: Array,
+    mushy_layer_depth: Array,
     height: Array,
 ) -> Array:
     temperature_term = (1 + temperature / params.kelvin_conversion_temperature) ** (-1)
     pressure_term = hydrostatic_pressure / params.atmospheric_pressure_scaled
     laplace_term = params.laplace_pressure_scale / params.atmospheric_pressure_scaled
     depth_term = (
-        -params.hydrostatic_pressure_scale * height / params.atmospheric_pressure_scaled
+        -params.hydrostatic_pressure_scale * height * mushy_layer_depth / params.atmospheric_pressure_scaled
     )
 
     return temperature_term * (1 + pressure_term + laplace_term + depth_term)
