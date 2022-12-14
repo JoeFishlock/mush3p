@@ -52,16 +52,17 @@ The steady ODE equations to be solved are
   \left( \phi_s + \phi_l \right) \frac{\mathrm{d}\theta}{\mathrm{d}z}
   + W_l \frac{\mathrm{d}\theta}{\mathrm{d}z}
   =  \text{St} \frac{\mathrm{d}\phi_s}{\mathrm{d}z}
-  + \frac{\mathrm{d}}{\mathrm{d}z} \left( \left[ \phi_s + \phi_l \right] \frac{\mathrm{d}\theta}{\mathrm{d}z} \right),
+  + \frac{\mathrm{d}}{\mathrm{d}z}
+  + \left( \left[ \phi_s + \phi_l + \nu_g \phi_g \right] \frac{\mathrm{d}\theta}{\mathrm{d}z} \right),
 ```
 
 ```math
-  W_l = - \pi(\phi_l) \frac{\mathrm{d}p_H}{\mathrm{d}z}, \qquad \text{where} \qquad p_H = p_l - p_0 + \frac{\rho g K z}{\mu_l V},
+  W_l = - \pi(\phi_l) \frac{\mathrm{d}p_H}{\mathrm{d}z}, \qquad \text{where} \qquad p_H = p_l - p_0 + \mathcal{H} z,
 ```
 
 ```math
 \psi = \left( 1 + \frac{\theta}{\theta_K} \right)^{-1}
-\left( 1 + \frac{p_H}{p_0} + \frac{2 \gamma}{R_B p_{\text{atm}}} - \frac{\rho g \kappa z}{p_{\text{atm}} V} \right),
+\left( 1 + \frac{p_H}{p_0} + \frac{\text{La}}{p_0} - \frac{\mathcal{H} z}{p_0} \right),
 ```
 
 ```math
