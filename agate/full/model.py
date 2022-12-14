@@ -412,3 +412,52 @@ def ode_fun_in_mushy_layer(
             ),
         )
     )
+
+
+def boundary_conditions_in_mushy_layer(
+    params: FullNonDimensionalParams,
+    variables_at_bottom: Any,
+    variables_at_top: Any,
+) -> Array:
+    (
+        temperature_at_top,
+        _,
+        _,
+        hydrostatic_pressure_at_top,
+        frozen_gas_fraction_at_top,
+        mushy_layer_depth_at_top,
+    ) = variables_at_top
+    (
+        temperature_at_bottom,
+        temperature_derivative_at_bottom,
+        dissolved_gas_concentration_at_bottom,
+        _,
+        frozen_gas_fraction_at_bottom,
+        mushy_layer_depth_at_bottom,
+    ) = variables_at_bottom
+
+    gas_density_at_top = calculate_gas_density_in_mushy_layer(
+        params=params,
+        temperature=temperature_at_top,
+        hydrostatic_pressure=hydrostatic_pressure_at_top,
+        mushy_layer_depth=mushy_layer_depth_at_top,
+        height=0,
+    )
+
+    return np.vstack(
+        (
+            hydrostatic_pressure_at_top,
+            temperature_at_top + 1,
+            frozen_gas_fraction_at_top
+            - calculate_frozen_gas_at_top_in_mushy_layer(
+                params=params, gas_density_at_top=gas_density_at_top
+            ),
+            temperature_at_bottom,
+            dissolved_gas_concentration_at_bottom
+            - params.far_dissolved_concentration_scaled,
+            temperature_derivative_at_bottom
+            + mushy_layer_depth_at_bottom
+            * params.far_temperature_scaled
+            * (1 - frozen_gas_fraction_at_bottom),
+        )
+    )
