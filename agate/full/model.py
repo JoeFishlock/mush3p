@@ -161,6 +161,15 @@ def calculate_gas_fraction_in_mushy_layer(
     return fsolve(residual, initial_guess)
 
 
+def calculate_permeability_in_mushy_layer(
+    params: FullNonDimensionalParams, liquid_fraction: Array
+) -> Array:
+    liquid_permeability_reciprocal = (1 - liquid_fraction) ** 2 / liquid_fraction**3
+    return (
+        1 / params.hele_shaw_permeability_scaled + liquid_permeability_reciprocal
+    ) ** (-1)
+
+
 def calculate_solid_fraction_derivative_in_mushy_layer(
     params: FullNonDimensionalParams,
     temperature: Array,
