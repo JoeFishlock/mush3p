@@ -1,7 +1,13 @@
 # Agate #
 
 ## Installation ##
-Using Python 3.9.13
+Agate so far has been developed in Python 3.9.13.
+To install the dependencies needed to run agate.
+Navigate to the directory one level up from the package (same as `main.py`). 
+From here a python virtual environment with the reuqired depencies may be created by running `bin/user_install.sh`.
+To work you may need to run `chmod u+x bin/user_install.sh`.
+The development dependencies can be installed the same way with `bin/dev_install.sh`.
+Agate may be imported into the `main.py` file.
 
 ## Usage ##
 
