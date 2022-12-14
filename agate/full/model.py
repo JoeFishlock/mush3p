@@ -272,6 +272,24 @@ def calculate_temperature_second_derivative_in_mushy_layer(
     )
 
 
+def calculate_dissolved_gas_concentration_derivative(
+    params: FullNonDimensionalParams,
+    dissolved_gas_concentration: Array,
+    solid_fraction_derivative: Array,
+    liquid_saturation: Array,
+    frozen_gas_fraction: Array,
+    solid_fraction: Array,
+    mushy_layer_depth,
+    nucleation_rate: Array,
+) -> Array:
+
+    damkholer_number = params.damkholer_number
+    freezing = dissolved_gas_concentration * solid_fraction_derivative
+    dissolution = -damkholer_number * mushy_layer_depth * nucleation_rate
+
+    return (freezing + dissolution) / (1 - frozen_gas_fraction - solid_fraction)
+
+
 def calculate_frozen_gas_at_top(
     params: FullNonDimensionalParams, gas_density_at_top: float
 ) -> float:
