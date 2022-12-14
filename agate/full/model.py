@@ -272,11 +272,10 @@ def calculate_temperature_second_derivative_in_mushy_layer(
     )
 
 
-def calculate_dissolved_gas_concentration_derivative(
+def calculate_dissolved_gas_concentration_derivative_in_mushy_layer(
     params: FullNonDimensionalParams,
     dissolved_gas_concentration: Array,
     solid_fraction_derivative: Array,
-    liquid_saturation: Array,
     frozen_gas_fraction: Array,
     solid_fraction: Array,
     mushy_layer_depth,
@@ -290,7 +289,7 @@ def calculate_dissolved_gas_concentration_derivative(
     return (freezing + dissolution) / (1 - frozen_gas_fraction - solid_fraction)
 
 
-def calculate_frozen_gas_at_top(
+def calculate_frozen_gas_at_top_in_mushy_layer(
     params: FullNonDimensionalParams, gas_density_at_top: float
 ) -> float:
     expansion_coefficient = params.expansion_coefficient
