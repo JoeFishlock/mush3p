@@ -289,6 +289,16 @@ def calculate_dissolved_gas_concentration_derivative_in_mushy_layer(
     return (freezing + dissolution) / (1 - frozen_gas_fraction - solid_fraction)
 
 
+def calculate_frozen_gas_fraction_derivative_in_mushy_layer(
+    temperature: Array,
+) -> Array:
+    return np.zeros_like(temperature)
+
+
+def calculate_mushy_layer_depth_derivative_in_mushy_layer(temperature: Array) -> Array:
+    return np.zeros_like(temperature)
+
+
 def calculate_frozen_gas_at_top_in_mushy_layer(
     params: FullNonDimensionalParams, gas_density_at_top: float
 ) -> float:
