@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Protocol
+from typing import Protocol, Dict, Any
 import os
 import json
 from dataclasses import dataclass, asdict
@@ -125,8 +125,69 @@ class FullPhysicalParams:
         temperature_diff = self.initial_temperature - self.eutectic_temperature
         return self.latent_heat / (temperature_diff * self.specific_heat_capacity)
 
+    @property
+    def hele_shaw_permeability_scaled(self) -> float:
+        return self.hele_shaw_gap_width**2 / (12 * self.reference_permeability)
+
+    @property
+    def far_temperature_scaled(self) -> float:
+        return (self.far_temperature - self.initial_temperature) / (
+            self.initial_temperature - self.eutectic_temperature
+        )
+
+    @property
+    def damkholer_number(self) -> float:
+        return self.time_scale / self.nucleation_time_scale
+
+    @property
+    def expansion_coefficient(self) -> float:
+        return (
+            self.liquid_density * self.reference_saturation_concentration
+        ) / self.reference_gas_density
+
+    @property
+    def stokes_rise_velocity_scaled(self) -> float:
+        return self.stokes_rise_velocity / self.reference_velocity
+
+    @property
+    def bubble_radius_scaled(self) -> float:
+        return self.bubble_radius / self.reference_pore_scale
+
+    @property
+    def far_dissolved_concentration_scaled(self) -> float:
+        return (
+            self.far_dissolved_gas_concentration
+            / self.reference_saturation_concentration
+        )
+
+    @property
+    def gas_conductivity_ratio(self) -> float:
+        return self.gas_thermal_conductivity / self.liquid_thermal_conductivity
+
+    @property
+    def hydrostatic_pressure_scale(self) -> float:
+        return (
+            self.liquid_density
+            * self.gravitational_acceleration
+            * self.liquid_thermal_diffusivity
+        ) / (self.pressure_scale * self.reference_velocity)
+
+    @property
+    def laplace_pressure_scale(self) -> float:
+        return 2 * self.surface_tension / (self.bubble_radius * self.pressure_scale)
+
+    @property
+    def kelvin_conversion_temperature(self) -> float:
+        return (self.initial_temperature + CELSIUS_TO_KELVIN) / (
+            self.initial_temperature - self.eutectic_temperature
+        )
+
+    @property
+    def atmospheric_pressure_scaled(self) -> float:
+        return self.atmospheric_pressure / self.pressure_scale
+
     def non_dimensionalise(self) -> FullNonDimensionalParams:
-        non_dimensional_params = {
+        non_dimensional_params: Dict[str, Any] = {
             "name": self.name,
             "concentration_ratio": self.concentration_ratio,
             "stefan_number": self.stefan_number,
@@ -136,10 +197,10 @@ class FullPhysicalParams:
             "expansion_coefficient": self.expansion_coefficient,
             "stokes_rise_velocity_scaled": self.stokes_rise_velocity_scaled,
             "bubble_radius_scaled": self.bubble_radius_scaled,
-            "far_concentration_scaled": self.far_concentration_scaled,
+            "far_dissolved_concentration_scaled": self.far_dissolved_concentration_scaled,
             "gas_conductivity_ratio": self.gas_conductivity_ratio,
-            "hydrostatic_pressure": self.hydrostatic_pressure,
-            "laplace_pressure": self.laplace_pressure,
+            "hydrostatic_pressure_scale": self.hydrostatic_pressure_scale,
+            "laplace_pressure_scale": self.laplace_pressure_scale,
             "kelvin_conversion_temperature": self.kelvin_conversion_temperature,
             "atmospheric_pressure_scaled": self.atmospheric_pressure_scaled,
         }
@@ -161,11 +222,11 @@ class FullNonDimensionalParams:
     expansion_coefficient: float
     stokes_rise_velocity_scaled: float
     bubble_radius_scaled: float
-    far_concentration_scaled: float
+    far_dissolved_concentration_scaled: float
     gas_conductivity_ratio: float
 
     # compressible gas params
-    hydrostatic_pressure: float
-    laplace_pressure: float
+    hydrostatic_pressure_scale: float
+    laplace_pressure_scale: float
     kelvin_conversion_temperature: float
     atmospheric_pressure_scaled: float
