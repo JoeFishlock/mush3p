@@ -309,3 +309,106 @@ def calculate_frozen_gas_at_top_in_mushy_layer(
         + gas_density_at_top
         / (expansion_coefficient * far_dissolved_concentration_scaled)
     ) ** (-1)
+
+
+def ode_fun_in_mushy_layer(
+    params: FullNonDimensionalParams, height: Array, variables: Any
+) -> Any:
+    (
+        temperature,
+        temperature_derivative,
+        dissolved_gas_concentration,
+        hydrostatic_pressure,
+        frozen_gas_fraction,
+        mushy_layer_depth,
+    ) = variables
+
+    solid_fraction = calculate_solid_fraction_in_mushy_layer(
+        params=params, temperature=temperature, frozen_gas_fraction=frozen_gas_fraction
+    )
+
+    solid_fraction_derivative = calculate_solid_fraction_derivative_in_mushy_layer(
+        params=params,
+        temperature=temperature,
+        temperature_derivative=temperature_derivative,
+        frozen_gas_fraction=frozen_gas_fraction,
+    )
+
+    gas_density = calculate_gas_density_in_mushy_layer(
+        params=params,
+        temperature=temperature,
+        hydrostatic_pressure=hydrostatic_pressure,
+        mushy_layer_depth=mushy_layer_depth,
+        height=height,
+    )
+
+    gas_fraction = calculate_gas_fraction_in_mushy_layer(
+        params=params,
+        solid_fraction=solid_fraction,
+        frozen_gas_fraction=frozen_gas_fraction,
+        gas_density=gas_density,
+        dissolved_gas_concentration=dissolved_gas_concentration,
+    )
+
+    gas_fraction_derivative = calculate_gas_fraction_derivative_in_mushy_layer(
+        gas_fraction=gas_fraction, height=height
+    )
+
+    liquid_fraction = calculate_liquid_fraction_in_mushy_layer(
+        solid_fraction=solid_fraction, gas_fraction=gas_fraction
+    )
+
+    liquid_saturation = calculate_liquid_saturation_in_mushy_layer(
+        solid_fraction=solid_fraction, liquid_fraction=liquid_fraction
+    )
+
+    nucleation_rate = calculate_nucleation_rate_in_mushy_layer(
+        temperature=temperature,
+        dissolved_gas_concentration=dissolved_gas_concentration,
+        liquid_saturation=liquid_saturation,
+    )
+
+    permeability = calculate_permeability_in_mushy_layer(
+        params=params, liquid_fraction=liquid_fraction
+    )
+
+    liquid_darcy_velocity = calculate_liquid_darcy_velocity_in_mushy_layer(
+        gas_fraction=gas_fraction, frozen_gas_fraction=frozen_gas_fraction
+    )
+
+    return np.vstack(
+        (
+            calculate_temperature_derivative_in_mushy_layer(
+                temperature_derivative=temperature_derivative
+            ),
+            calculate_temperature_second_derivative_in_mushy_layer(
+                params=params,
+                temperature_derivative=temperature_derivative,
+                gas_fraction=gas_fraction,
+                frozen_gas_fraction=frozen_gas_fraction,
+                mushy_layer_depth=mushy_layer_depth,
+                solid_fraction_derivative=solid_fraction_derivative,
+                gas_fraction_derivative=gas_fraction_derivative,
+            ),
+            calculate_dissolved_gas_concentration_derivative_in_mushy_layer(
+                params=params,
+                dissolved_gas_concentration=dissolved_gas_concentration,
+                solid_fraction_derivative=solid_fraction_derivative,
+                frozen_gas_fraction=frozen_gas_fraction,
+                solid_fraction=solid_fraction,
+                mushy_layer_depth=mushy_layer_depth,
+                nucleation_rate=nucleation_rate,
+            ),
+            calculate_hydrostatic_pressure_derivative_in_mushy_layer(
+                permeability=permeability,
+                liquid_darcy_velocity=liquid_darcy_velocity,
+                mushy_layer_depth=mushy_layer_depth,
+            ),
+            calculate_frozen_gas_fraction_derivative_in_mushy_layer(
+                temperature=temperature
+            ),
+            calculate_mushy_layer_depth_derivative_in_mushy_layer(
+                temperature=temperature
+            ),
+        )
+    )
