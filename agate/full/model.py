@@ -170,6 +170,48 @@ def calculate_permeability_in_mushy_layer(
     ) ** (-1)
 
 
+def calculate_saturation_concentration_in_mushy_layer(temperature: Array) -> Array:
+    return np.full_like(temperature, 1)
+
+
+def calculate_unconstrained_nucleation_rate_in_mushy_layer(
+    dissolved_gas_concentration: Array, saturation_concentration: Array
+) -> Array:
+    return dissolved_gas_concentration - saturation_concentration
+
+
+def calculate_nucleation_indicator_in_mushy_layer(
+    dissolved_gas_concentration: Array, liquid_saturation: Array
+) -> Array:
+    indicator = np.where(
+        (liquid_saturation == 1) and (dissolved_gas_concentration >= 1), 1, 0
+    )
+    indicator = np.where(
+        (0 < liquid_saturation) and (liquid_saturation < 1), 1, indicator
+    )
+    return indicator
+
+
+def calculate_nucleation_rate_in_mushy_layer(
+    temperature: Array, dissolved_gas_concentration: Array, liquid_saturation: Array
+) -> Array:
+    saturation_concentration = calculate_saturation_concentration_in_mushy_layer(
+        temperature=temperature
+    )
+    unconstrained_nucleation_rate = (
+        calculate_unconstrained_nucleation_rate_in_mushy_layer(
+            dissolved_gas_concentration=dissolved_gas_concentration,
+            saturation_concentration=saturation_concentration,
+        )
+    )
+    nucleation_indicator = calculate_nucleation_indicator_in_mushy_layer(
+        dissolved_gas_concentration=dissolved_gas_concentration,
+        liquid_saturation=liquid_saturation,
+    )
+
+    return nucleation_indicator * unconstrained_nucleation_rate
+
+
 def calculate_solid_fraction_derivative_in_mushy_layer(
     params: FullNonDimensionalParams,
     temperature: Array,
