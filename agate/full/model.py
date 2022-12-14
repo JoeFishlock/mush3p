@@ -198,6 +198,38 @@ def calculate_hydrostatic_pressure_derivative_in_mushy_layer(
     return -mushy_layer_depth * liquid_darcy_velocity / permeability
 
 
+def calculate_temperature_derivative_in_mushy_layer(
+    temperature_derivative: Array,
+) -> Array:
+    return temperature_derivative
+
+
+def calculate_temperature_second_derivative_in_mushy_layer(
+    params: FullNonDimensionalParams,
+    temperature_derivative: Array,
+    gas_fraction: Array,
+    frozen_gas_fraction: Array,
+    mushy_layer_depth: Array,
+    solid_fraction_derivative: Array,
+    gas_fraction_derivative: Array,
+) -> Array:
+    stefan_number = params.stefan_number
+    gas_conductivity_ratio = params.gas_conductivity_ratio
+
+    heating = (
+        mushy_layer_depth * (1 - frozen_gas_fraction) * temperature_derivative
+        - mushy_layer_depth * stefan_number * solid_fraction_derivative
+    )
+
+    gas_insulation = (
+        (1 - gas_conductivity_ratio) * gas_fraction_derivative * temperature_derivative
+    )
+
+    return (heating + gas_insulation) / (
+        1 - (1 - gas_conductivity_ratio) * gas_fraction
+    )
+
+
 def calculate_frozen_gas_at_top(
     params: FullNonDimensionalParams, gas_density_at_top: float
 ) -> float:
