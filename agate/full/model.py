@@ -157,6 +157,21 @@ def calculate_gas_fraction_in_mushy_layer(
     return fsolve(residual, initial_guess)
 
 
+def calculate_solid_fraction_derivative_in_mushy_layer(
+    params: FullNonDimensionalParams,
+    temperature: Array,
+    temperature_derivative: Array,
+    frozen_gas_fraction: Array,
+) -> Array:
+    concentration_ratio = params.concentration_ratio
+    return (
+        concentration_ratio
+        * (1 - frozen_gas_fraction)
+        * temperature_derivative
+        / (concentration_ratio - temperature) ** 2
+    )
+
+
 def calculate_frozen_gas_at_top(
     params: FullNonDimensionalParams, gas_density_at_top: float
 ) -> float:
