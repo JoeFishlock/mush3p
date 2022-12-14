@@ -192,6 +192,12 @@ def calculate_gas_fraction_derivative_in_mushy_layer(
     return np.gradient(gas_fraction, height)
 
 
+def calculate_hydrostatic_pressure_derivative_in_mushy_layer(
+    permeability: Array, liquid_darcy_velocity: Array, mushy_layer_depth: Array
+) -> Array:
+    return -mushy_layer_depth * liquid_darcy_velocity / permeability
+
+
 def calculate_frozen_gas_at_top(
     params: FullNonDimensionalParams, gas_density_at_top: float
 ) -> float:
