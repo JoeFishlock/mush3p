@@ -3,7 +3,6 @@ from typing import Protocol, Dict, Any
 import os
 import json
 from dataclasses import dataclass, asdict
-from agate.model import Model
 from agate.output import NonDimensionalOutput
 
 CELSIUS_TO_KELVIN = 273.15
@@ -27,7 +26,6 @@ class NonDimensionalParams(Protocol):
 
     def solve(
         self,
-        model: Model,
         numerical_params: NumericalParams = NumericalParams(),
     ) -> NonDimensionalOutput:
         ...
@@ -262,8 +260,7 @@ class FullNonDimensionalParams:
 
     def solve(
         self,
-        model: FullModel,
         numerical_params: NumericalParams = NumericalParams(),
-    ) -> NonDimensionalOutput:
+    ) -> FullNonDimensionalOutput:
         # TODO: implement FullNonDimensionalParams.solve <14-12-22, Joe Fishlock> #
         pass
