@@ -477,8 +477,8 @@ def boundary_conditions_in_mushy_layer(
     )
 
 
-def solve_in_mushy_layer(params: FullNonDimensionalParams) -> tuple[NDArray, NDArray]:
-    sol = solve_bvp(
+def solve_in_mushy_layer(params: FullNonDimensionalParams) -> Any:
+    solution_object = solve_bvp(
         lambda x, y: ode_fun_in_mushy_layer(params=params, height=x, variables=y),
         lambda ya, yb: boundary_conditions_in_mushy_layer(
             params=params, variables_at_bottom=ya, variables_at_top=yb
@@ -487,4 +487,4 @@ def solve_in_mushy_layer(params: FullNonDimensionalParams) -> tuple[NDArray, NDA
         INITIAL_VARIABLES,
         verbose=2,
     )
-    return sol.x, sol.y
+    return solution_object
