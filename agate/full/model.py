@@ -45,6 +45,8 @@ INITIAL_VARIABLES = np.vstack(
     )
 )
 
+DIFFERENCE_TOLERANCE = 1e-8
+
 Array = Union[NDArray, float]
 
 
@@ -507,6 +509,13 @@ def get_array_from_solution(solution_object, variable):
         raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
 
     return solution_object.y[variables[variable]]
+
+
+def check_variation_is_small(array):
+    max_difference = np.max(np.abs(np.diff(array)))
+    if max_difference > DIFFERENCE_TOLERANCE:
+        return False
+    return True
 
 
 def get_spline_from_solution(solution_object: Any, variable):
