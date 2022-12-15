@@ -496,25 +496,25 @@ def get_height_from_solution(solution_object):
 
 def get_array_from_solution(solution_object, variable):
     variables = {
-        'temperature': 0,
-        'temperature_derivative': 1,
-        'concentration': 2,
-        'hydrostatic_pressure': 3,
-        'frozen_gas_fraction': 4,
-        'mushy_layer_depth': 5
+        "temperature": 0,
+        "temperature_derivative": 1,
+        "concentration": 2,
+        "hydrostatic_pressure": 3,
+        "frozen_gas_fraction": 4,
+        "mushy_layer_depth": 5,
     }
     if variable not in variables.keys():
         raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
-    
+
     return solution_object.y[variables[variable]]
 
 
 def get_spline_from_solution(solution_object: Any, variable):
     variables = {
-        'temperature': 0,
-        'temperature_derivative': 1,
-        'concentration': 2,
-        'hydrostatic_pressure': 3,
+        "temperature": 0,
+        "temperature_derivative": 1,
+        "concentration": 2,
+        "hydrostatic_pressure": 3,
     }
     if variable not in variables.keys():
         raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
