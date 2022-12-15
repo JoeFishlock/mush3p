@@ -202,16 +202,13 @@ def calculate_unconstrained_nucleation_rate_in_mushy_layer(
 
 
 def calculate_nucleation_indicator_in_mushy_layer(
-    dissolved_gas_concentration: Array, liquid_saturation: Array
+    dissolved_gas_concentration: Array, saturation_concentration: Array
 ) -> Array:
-    indicator = np.where(
-        dissolved_gas_concentration >= 1, 1, 0
-    )
-    return indicator
+    return np.where(dissolved_gas_concentration >= saturation_concentration, 1, 0)
 
 
 def calculate_nucleation_rate_in_mushy_layer(
-    temperature: Array, dissolved_gas_concentration: Array, liquid_saturation: Array
+    temperature: Array, dissolved_gas_concentration: Array
 ) -> Array:
     saturation_concentration = calculate_saturation_concentration_in_mushy_layer(
         temperature=temperature
@@ -224,7 +221,7 @@ def calculate_nucleation_rate_in_mushy_layer(
     )
     nucleation_indicator = calculate_nucleation_indicator_in_mushy_layer(
         dissolved_gas_concentration=dissolved_gas_concentration,
-        liquid_saturation=liquid_saturation,
+        saturation_concentration=saturation_concentration,
     )
 
     return nucleation_indicator * unconstrained_nucleation_rate
@@ -383,7 +380,6 @@ def ode_fun_in_mushy_layer(
     nucleation_rate = calculate_nucleation_rate_in_mushy_layer(
         temperature=temperature,
         dissolved_gas_concentration=dissolved_gas_concentration,
-        liquid_saturation=liquid_saturation,
     )
 
     permeability = calculate_permeability_in_mushy_layer(
