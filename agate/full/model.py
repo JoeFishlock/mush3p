@@ -205,10 +205,7 @@ def calculate_nucleation_indicator_in_mushy_layer(
     dissolved_gas_concentration: Array, liquid_saturation: Array
 ) -> Array:
     indicator = np.where(
-        (liquid_saturation == 1) & (dissolved_gas_concentration >= 1), 1, 0
-    )
-    indicator = np.where(
-        (0 < liquid_saturation) & (liquid_saturation < 1), 1, indicator
+        dissolved_gas_concentration >= 1, 1, 0
     )
     return indicator
 
