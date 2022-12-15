@@ -488,3 +488,38 @@ def solve_in_mushy_layer(params: FullNonDimensionalParams) -> Any:
         verbose=2,
     )
     return solution_object
+
+
+def get_height_from_solution(solution_object):
+    return solution_object.x
+
+
+def get_array_from_solution(solution_object, variable):
+    variables = {
+        'temperature': 0,
+        'temperature_derivative': 1,
+        'concentration': 2,
+        'hydrostatic_pressure': 3,
+        'frozen_gas_fraction': 4,
+        'mushy_layer_depth': 5
+    }
+    if variable not in variables.keys():
+        raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
+    
+    return solution_object.y[variables[variable]]
+
+
+def get_spline_from_solution(solution_object: Any, variable):
+    variables = {
+        'temperature': 0,
+        'temperature_derivative': 1,
+        'concentration': 2,
+        'hydrostatic_pressure': 3,
+    }
+    if variable not in variables.keys():
+        raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
+
+    def spline(height):
+        return solution_object.sol(height)[variables[variable]]
+
+    return spline
