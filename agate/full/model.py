@@ -28,11 +28,11 @@ PORE_THROAT_SCALING: float = 0.5
 INITIAL_MESH_NODES: int = 20
 INITIAL_HEIGHT: NDArray = np.linspace(-1, 0, INITIAL_MESH_NODES)
 INITIAL_TEMPERATURE: NDArray = np.linspace(0, -1, INITIAL_MESH_NODES)
-INITIAL_TEMPERATURE_DERIVATIVE = np.full_like(INITIAL_TEMPERATURE, -0.5)
-INITIAL_DISSOLVED_GAS_CONCENTRATION = np.full_like(INITIAL_TEMPERATURE, 1.0)
-INITIAL_HYDROSTATIC_PRESSURE = np.full_like(INITIAL_TEMPERATURE, 0)
+INITIAL_TEMPERATURE_DERIVATIVE = np.full_like(INITIAL_TEMPERATURE, -1.0)
+INITIAL_DISSOLVED_GAS_CONCENTRATION = np.linspace(0.8, 1.0, INITIAL_MESH_NODES)
+INITIAL_HYDROSTATIC_PRESSURE = np.linspace(-0.1, 0, INITIAL_MESH_NODES)
 INITIAL_FROZEN_GAS_FRACTION = np.full_like(INITIAL_TEMPERATURE, 0.02)
-INITIAL_MUSHY_LAYER_DEPTH = np.full_like(INITIAL_TEMPERATURE, 0.4)
+INITIAL_MUSHY_LAYER_DEPTH = np.full_like(INITIAL_TEMPERATURE, 1.5)
 
 INITIAL_VARIABLES = np.vstack(
     (
@@ -98,7 +98,7 @@ def calculate_lag_in_mushy_layer(bubble_radius: Array) -> Array:
 
 
 def calculate_drag_in_mushy_layer(bubble_radius: Array) -> Array:
-    drag = np.where(bubble_radius < 0, 1, (1 - bubble_radius) ** 4)
+    drag = np.where(bubble_radius < 0, 1, (1 - bubble_radius) ** 6)
     drag = np.where(bubble_radius > 1, 0, drag)
     return drag
 
@@ -241,7 +241,7 @@ def calculate_solid_fraction_derivative_in_mushy_layer(
 ) -> Array:
     concentration_ratio = params.concentration_ratio
     return (
-        concentration_ratio
+        -concentration_ratio
         * (1 - frozen_gas_fraction)
         * temperature_derivative
         / (concentration_ratio - temperature) ** 2
