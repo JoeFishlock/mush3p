@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 # Script to create virtual python environment called dev
 # then install the developement dependencies in the new environment.

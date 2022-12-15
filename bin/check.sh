@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 # This script should be run in the dev virtual environment
 # source dev/bin/activate
