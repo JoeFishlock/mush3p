@@ -46,6 +46,7 @@ INITIAL_VARIABLES = np.vstack(
 )
 
 DIFFERENCE_TOLERANCE = 1e-8
+VOLUME_SUM_TOLERANCE = 1e-8
 
 Array = Union[NDArray, float]
 
@@ -328,6 +329,15 @@ def calculate_frozen_gas_at_top_in_mushy_layer(
     ) ** (-1)
 
 
+def check_volume_fractions_sum_to_one(solid_fraction, liquid_fraction, gas_fraction):
+    if (
+        np.max(np.abs(solid_fraction + liquid_fraction + gas_fraction - 1))
+        > VOLUME_SUM_TOLERANCE
+    ):
+        return False
+    return True
+
+
 def ode_fun_in_mushy_layer(
     params: FullNonDimensionalParams, height: Array, variables: Any
 ) -> Any:
@@ -391,6 +401,11 @@ def ode_fun_in_mushy_layer(
     liquid_darcy_velocity = calculate_liquid_darcy_velocity_in_mushy_layer(
         gas_fraction=gas_fraction, frozen_gas_fraction=frozen_gas_fraction
     )
+
+    if not check_volume_fractions_sum_to_one(
+        solid_fraction, liquid_fraction, gas_fraction
+    ):
+        raise ValueError("Volume fractions do not sum to 1")
 
     return np.vstack(
         (
