@@ -181,11 +181,11 @@ class FullPhysicalParams:
             self.liquid_density
             * self.gravitational_acceleration
             * self.liquid_thermal_diffusivity
-        ) / (self.pressure_scale * self.reference_velocity)
+        ) / (self.atmospheric_pressure * self.reference_velocity)
 
     @property
     def laplace_pressure_scale(self) -> float:
-        return 2 * self.surface_tension / (self.bubble_radius * self.pressure_scale)
+        return 2 * self.surface_tension / (self.bubble_radius * self.atmospheric_pressure)
 
     @property
     def kelvin_conversion_temperature(self) -> float:
