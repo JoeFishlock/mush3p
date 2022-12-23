@@ -3,7 +3,9 @@ from typing import Protocol, Dict, Any
 import os
 import json
 from dataclasses import dataclass, asdict
+from scipy.integrate import solve_bvp
 from agate.output import NonDimensionalOutput
+from agate.model import FullModel
 
 CELSIUS_TO_KELVIN = 273.15
 
@@ -185,7 +187,9 @@ class FullPhysicalParams:
 
     @property
     def laplace_pressure_scale(self) -> float:
-        return 2 * self.surface_tension / (self.bubble_radius * self.atmospheric_pressure)
+        return (
+            2 * self.surface_tension / (self.bubble_radius * self.atmospheric_pressure)
+        )
 
     @property
     def kelvin_conversion_temperature(self) -> float:
@@ -258,9 +262,16 @@ class FullNonDimensionalParams:
             os.makedirs(data_path)
         json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
 
-    def solve(
-        self,
-        numerical_params: NumericalParams = NumericalParams(),
-    ) -> FullNonDimensionalOutput:
-        # TODO: implement FullNonDimensionalParams.solve <14-12-22, Joe Fishlock> #
-        pass
+    def solve(self, model_choice: str) -> Any:
+        if model_choice != "full":
+            raise ValueError("Only full model is implemented")
+
+        model = FullModel(self)
+        solution_object = solve_bvp(
+            model.ode_fun,
+            model.boundary_conditions,
+            model.INITIAL_HEIGHT,
+            model.INITIAL_VARIABLES,
+            verbose=2,
+        )
+        return solution_object
