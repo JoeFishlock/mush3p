@@ -453,21 +453,6 @@ def get_height_from_solution(solution_object):
     return solution_object.x
 
 
-def get_array_from_solution(solution_object, variable):
-    variables = {
-        "temperature": 0,
-        "temperature_derivative": 1,
-        "concentration": 2,
-        "hydrostatic_pressure": 3,
-        "frozen_gas_fraction": 4,
-        "mushy_layer_depth": 5,
-    }
-    if variable not in variables.keys():
-        raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
-
-    return solution_object.y[variables[variable]]
-
-
 def check_variation_is_small(array):
     max_difference = np.max(np.abs(np.diff(array)))
     if max_difference > DIFFERENCE_TOLERANCE:
