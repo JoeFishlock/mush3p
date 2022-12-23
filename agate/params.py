@@ -4,50 +4,9 @@ import os
 import json
 from dataclasses import dataclass, asdict
 from scipy.integrate import solve_bvp
-from agate.output import NonDimensionalOutput
 from agate.model import FullModel
 
 CELSIUS_TO_KELVIN = 273.15
-
-
-class NumericalParams:
-    tol: float = 1e-7
-
-
-class NonDimensionalParams(Protocol):
-    @property
-    def params(self) -> Dict[str, Any]:
-        ...
-
-    @classmethod
-    def load(cls, filename: str) -> NonDimensionalParams:
-        ...
-
-    def save(self, filename: str) -> None:
-        ...
-
-    def solve(
-        self,
-        numerical_params: NumericalParams = NumericalParams(),
-    ) -> NonDimensionalOutput:
-        ...
-
-
-class PhysicalParams(Protocol):
-    @property
-    def params(self) -> dict:
-        ...
-
-    @classmethod
-    def load(cls, filename: str) -> PhysicalParams:
-        ...
-
-    def save(self, filename: str) -> None:
-        ...
-
-    def non_dimensionalise(self) -> NonDimensionalParams:
-        ...
-
 
 @dataclass
 class FullPhysicalParams:
