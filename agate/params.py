@@ -8,8 +8,9 @@ from agate.model import FullModel
 
 CELSIUS_TO_KELVIN = 273.15
 
+
 @dataclass
-class FullPhysicalParams:
+class PhysicalParams:
     name: str
     liquid_density: float = 1028  # kg/m3
     far_salinity: float = 34  # psu (g/kg)
@@ -76,7 +77,7 @@ class FullPhysicalParams:
         return asdict(self)
 
     @classmethod
-    def load(cls, filename: str) -> FullPhysicalParams:
+    def load(cls, filename: str) -> PhysicalParams:
         data_path = "data"
         params = json.load(open(f"{data_path}/{filename}.json"))
         return cls(**params)
@@ -160,7 +161,7 @@ class FullPhysicalParams:
     def atmospheric_pressure_scaled(self) -> float:
         return self.atmospheric_pressure / self.pressure_scale
 
-    def non_dimensionalise(self) -> FullNonDimensionalParams:
+    def non_dimensionalise(self) -> NonDimensionalParams:
         non_dimensional_params: Dict[str, Any] = {
             "name": self.name,
             "concentration_ratio": self.concentration_ratio,
@@ -178,11 +179,11 @@ class FullPhysicalParams:
             "kelvin_conversion_temperature": self.kelvin_conversion_temperature,
             "atmospheric_pressure_scaled": self.atmospheric_pressure_scaled,
         }
-        return FullNonDimensionalParams(**non_dimensional_params)
+        return NonDimensionalParams(**non_dimensional_params)
 
 
 @dataclass
-class FullNonDimensionalParams:
+class NonDimensionalParams:
     name: str
 
     # mushy layer params
@@ -210,7 +211,7 @@ class FullNonDimensionalParams:
         return asdict(self)
 
     @classmethod
-    def load(cls, filename: str) -> FullNonDimensionalParams:
+    def load(cls, filename: str) -> NonDimensionalParams:
         data_path = "data"
         params = json.load(open(f"{data_path}/{filename}.json"))
         return cls(**params)
