@@ -235,6 +235,11 @@ class NonDimensionalParams:
             model.boundary_conditions,
             model.INITIAL_HEIGHT,
             model.INITIAL_VARIABLES,
-            verbose=2,
+            verbose=0,
         )
-        return solution_object
+        if solution_object.success:
+            return solution_object
+        else:
+            raise RuntimeError(
+                f"Could not solve {self.name}.\nSolver exited with:\n{solution_object.message}"
+            )
