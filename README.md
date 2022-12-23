@@ -63,12 +63,12 @@ The steady ODE equations to be solved are
 ```
 
 ```math
-  W_l = - \pi(\phi_l) \frac{\mathrm{d}p_H}{\mathrm{d}z}, \qquad \text{where} \qquad p_H = p_l - p_0 + \mathcal{H} z,
+  W_l = - \pi(\phi_l) \frac{\mathrm{d}p_H}{\mathrm{d}z}, \qquad \text{where} \qquad p_H = p_l - p_0 + p_0 \mathcal{H} z,
 ```
 
 ```math
 \psi = \left( 1 + \frac{\theta}{\theta_K} \right)^{-1}
-\left( 1 + \frac{p_H}{p_0} + \frac{\text{La}}{p_0} - \frac{\mathcal{H} z}{p_0} \right),
+\left( 1 + \frac{p_H}{p_0} + \text{La} - \mathcal{H} z \right),
 ```
 
 ```math
