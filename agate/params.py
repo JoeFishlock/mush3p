@@ -12,7 +12,7 @@ CELSIUS_TO_KELVIN = 273.15
 @dataclass
 class PhysicalParams:
     name: str
-    model: str = "full"
+    model_choice: str = "full"
     liquid_density: float = 1028  # kg/m3
     far_salinity: float = 34  # psu (g/kg)
     eutectic_salinity: float = 230  # psu (g/kg)
@@ -165,7 +165,7 @@ class PhysicalParams:
     def non_dimensionalise(self) -> NonDimensionalParams:
         non_dimensional_params: Dict[str, Any] = {
             "name": self.name,
-            "model": self.model,
+            "model_choice": self.model_choice,
             "concentration_ratio": self.concentration_ratio,
             "stefan_number": self.stefan_number,
             "hele_shaw_permeability_scaled": self.hele_shaw_permeability_scaled,
@@ -187,7 +187,7 @@ class PhysicalParams:
 @dataclass
 class NonDimensionalParams:
     name: str
-    model: str
+    model_choice: str
 
     # mushy layer params
     concentration_ratio: float
@@ -226,7 +226,7 @@ class NonDimensionalParams:
         json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
 
     def solve(self) -> Any:
-        if self.model != "full":
+        if self.model_choice != "full":
             raise ValueError("Only full model is implemented")
 
         model = FullModel(self)
