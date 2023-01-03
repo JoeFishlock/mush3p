@@ -1,5 +1,6 @@
 from scipy.integrate import solve_bvp
 from agate.output import NonDimensionalResults
+from agate.model import MODEL_OPTIONS
 
 
 def get_array_from_solution(solution_object, variable):
@@ -18,8 +19,10 @@ def get_array_from_solution(solution_object, variable):
 
 
 def solve(non_dimensional_params):
-    if non_dimensional_params.model_choice != "full":
-        raise ValueError("Only full model is implemented")
+    if non_dimensional_params.model_choice not in MODEL_OPTIONS.keys():
+        raise ValueError(
+            f"model_choice must be one of the implemented: {MODEL_OPTIONS.keys()}"
+        )
 
     model = non_dimensional_params.create_model()
     solution_object = solve_bvp(
