@@ -33,8 +33,8 @@ class NonDimensionalResults:
         )
         self.frozen_gas_fraction = get_array_from_solution(
             solution_object, "frozen_gas_fraction"
-        )
+        )[-1]
         self.mushy_layer_depth = get_array_from_solution(
             solution_object, "mushy_layer_depth"
-        )
+        )[0]
         self.height_array = solution_object.x
