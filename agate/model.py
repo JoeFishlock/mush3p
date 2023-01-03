@@ -449,10 +449,6 @@ class FullModel:
         )
 
 
-def get_height_from_solution(solution_object):
-    return solution_object.x
-
-
 def check_variation_is_small(array):
     max_difference = np.max(np.abs(np.diff(array)))
     if max_difference > DIFFERENCE_TOLERANCE:
@@ -460,17 +456,5 @@ def check_variation_is_small(array):
     return True
 
 
-def get_spline_from_solution(solution_object: Any, variable):
-    variables = {
-        "temperature": 0,
-        "temperature_derivative": 1,
-        "concentration": 2,
-        "hydrostatic_pressure": 3,
-    }
-    if variable not in variables.keys():
-        raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
-
-    def spline(height):
-        return solution_object.sol(height)[variables[variable]]
-
-    return spline
+# Put all models that can be run in this dictionary
+MODEL_OPTIONS = {"full": FullModel}

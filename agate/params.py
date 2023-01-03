@@ -4,7 +4,7 @@ import os
 import json
 from dataclasses import dataclass, asdict
 from scipy.integrate import solve_bvp
-from agate.model import FullModel
+from agate.model import MODEL_OPTIONS
 
 CELSIUS_TO_KELVIN = 273.15
 
@@ -225,11 +225,14 @@ class NonDimensionalParams:
             os.makedirs(data_path)
         json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
 
+    def create_model(self):
+        return MODEL_OPTIONS[self.model_choice](self)
+
     def solve(self) -> Any:
         if self.model_choice != "full":
             raise ValueError("Only full model is implemented")
 
-        model = FullModel(self)
+        model = self.create_model()
         solution_object = solve_bvp(
             model.ode_fun,
             model.boundary_conditions,
