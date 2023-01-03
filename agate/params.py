@@ -79,8 +79,7 @@ class PhysicalParams:
 
     @classmethod
     def load(cls, filename: str) -> PhysicalParams:
-        data_path = "data"
-        params = json.load(open(f"{data_path}/{filename}.json"))
+        params = json.load(open(f"{filename}.json"))
         return cls(**params)
 
     def save(self, filename: str) -> None:
@@ -212,8 +211,7 @@ class NonDimensionalParams:
 
     @classmethod
     def load(cls, filename: str) -> NonDimensionalParams:
-        data_path = "data"
-        params = json.load(open(f"{data_path}/{filename}.json"))
+        params = json.load(open(f"{filename}.json"))
         return cls(**params)
 
     def save(self, filename: str) -> None:
