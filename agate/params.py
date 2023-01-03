@@ -4,7 +4,7 @@ import os
 import json
 from dataclasses import dataclass, asdict
 from scipy.integrate import solve_bvp
-from agate.model import FullModel
+from agate.model import MODEL_OPTIONS
 
 CELSIUS_TO_KELVIN = 273.15
 
@@ -12,6 +12,7 @@ CELSIUS_TO_KELVIN = 273.15
 @dataclass
 class PhysicalParams:
     name: str
+    model_choice: str = "full"
     liquid_density: float = 1028  # kg/m3
     far_salinity: float = 34  # psu (g/kg)
     eutectic_salinity: float = 230  # psu (g/kg)
@@ -164,6 +165,7 @@ class PhysicalParams:
     def non_dimensionalise(self) -> NonDimensionalParams:
         non_dimensional_params: Dict[str, Any] = {
             "name": self.name,
+            "model_choice": self.model_choice,
             "concentration_ratio": self.concentration_ratio,
             "stefan_number": self.stefan_number,
             "hele_shaw_permeability_scaled": self.hele_shaw_permeability_scaled,
@@ -185,6 +187,7 @@ class PhysicalParams:
 @dataclass
 class NonDimensionalParams:
     name: str
+    model_choice: str
 
     # mushy layer params
     concentration_ratio: float
@@ -222,16 +225,24 @@ class NonDimensionalParams:
             os.makedirs(data_path)
         json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
 
-    def solve(self, model_choice: str) -> Any:
-        if model_choice != "full":
+    def create_model(self):
+        return MODEL_OPTIONS[self.model_choice](self)
+
+    def solve(self) -> Any:
+        if self.model_choice != "full":
             raise ValueError("Only full model is implemented")
 
-        model = FullModel(self)
+        model = self.create_model()
         solution_object = solve_bvp(
             model.ode_fun,
             model.boundary_conditions,
             model.INITIAL_HEIGHT,
             model.INITIAL_VARIABLES,
-            verbose=2,
+            verbose=0,
         )
-        return solution_object
+        if solution_object.success:
+            return solution_object
+        else:
+            raise RuntimeError(
+                f"Could not solve {self.name}.\nSolver exited with:\n{solution_object.message}"
+            )

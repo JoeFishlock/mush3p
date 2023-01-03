@@ -448,24 +448,45 @@ class FullModel:
             ]
         )
 
-
-def get_height_from_solution(solution_object):
-    return solution_object.x
-
-
-def get_array_from_solution(solution_object, variable):
-    variables = {
-        "temperature": 0,
-        "temperature_derivative": 1,
-        "concentration": 2,
-        "hydrostatic_pressure": 3,
-        "frozen_gas_fraction": 4,
-        "mushy_layer_depth": 5,
-    }
-    if variable not in variables.keys():
-        raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
-
-    return solution_object.y[variables[variable]]
+    def calculate_all_variables(
+        self,
+        temperature,
+        temperature_derivative,
+        dissolved_gas_concentration,
+        hydrostatic_pressure,
+        frozen_gas_fraction,
+        mushy_layer_depth,
+        height,
+    ):
+        solid_salinity = self.calculate_solid_salinity(temperature)
+        liquid_salinity = self.calculate_liquid_salinity(temperature)
+        solid_fraction = self.calculate_solid_fraction(temperature, frozen_gas_fraction)
+        gas_density = self.calculate_gas_density(
+            temperature, hydrostatic_pressure, mushy_layer_depth, height
+        )
+        gas_fraction = self.calculate_gas_fraction(
+            solid_fraction,
+            frozen_gas_fraction,
+            gas_density,
+            dissolved_gas_concentration,
+        )
+        liquid_fraction = self.calculate_liquid_fraction(solid_fraction, gas_fraction)
+        liquid_darcy_velocity = self.calculate_liquid_darcy_velocity(
+            gas_fraction, frozen_gas_fraction
+        )
+        gas_darcy_velocity = self.calculate_gas_darcy_velocity(
+            gas_fraction, liquid_fraction, liquid_darcy_velocity
+        )
+        return (
+            solid_salinity,
+            liquid_salinity,
+            solid_fraction,
+            liquid_fraction,
+            gas_fraction,
+            gas_density,
+            liquid_darcy_velocity,
+            gas_darcy_velocity,
+        )
 
 
 def check_variation_is_small(array):
@@ -475,17 +496,5 @@ def check_variation_is_small(array):
     return True
 
 
-def get_spline_from_solution(solution_object: Any, variable):
-    variables = {
-        "temperature": 0,
-        "temperature_derivative": 1,
-        "concentration": 2,
-        "hydrostatic_pressure": 3,
-    }
-    if variable not in variables.keys():
-        raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
-
-    def spline(height):
-        return solution_object.sol(height)[variables[variable]]
-
-    return spline
+# Put all models that can be run in this dictionary
+MODEL_OPTIONS = {"full": FullModel}
