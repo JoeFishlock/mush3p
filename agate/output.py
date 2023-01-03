@@ -1,4 +1,5 @@
 """Class for storing simulation output"""
+import numpy as np
 
 
 def get_array_from_solution(solution_object, variable):
@@ -21,6 +22,7 @@ class NonDimensionalResults:
 
     def __init__(self, non_dimensional_parameters):
         solution_object = non_dimensional_parameters.solve()
+        self.params = non_dimensional_parameters
         self.temperature_array = get_array_from_solution(solution_object, "temperature")
         self.temperature_derivative_array = get_array_from_solution(
             solution_object, "temperature_derivative"
@@ -60,3 +62,72 @@ class NonDimensionalResults:
             mushy_layer_depth=self.mushy_layer_depth,
             height=self.height_array,
         )
+
+    def liquid_salinity(self, height):
+        return np.interp(
+            height, self.height_array, self.liquid_salinity_array, right=np.NaN
+        )
+
+    def temperature(self, height):
+        liquid_darcy_velocity_at_bottom = self.liquid_darcy_velocity_array[0]
+        liquid_range = np.linspace(-10, -1.1, 100)
+        liquid_values = self.params.far_temperature_scaled * (
+            1
+            - np.exp(
+                (1 + liquid_darcy_velocity_at_bottom)
+                * self.mushy_layer_depth
+                * (liquid_range + 1)
+            )
+        )
+        return np.interp(
+            height,
+            np.hstack((liquid_range, self.height_array)),
+            np.hstack((liquid_values, self.temperature_array)),
+            left=self.params.far_temperature_scaled,
+        )
+
+    def concentration(self, height):
+        return np.interp(
+            height, self.height_array, self.concentration_array, right=np.NaN
+        )
+
+    def hydrostatic_pressure(self, height):
+        return np.interp(
+            height, self.height_array, self.hydrostatic_pressure_array, right=np.NaN
+        )
+
+    def solid_fraction(self, height):
+        return np.interp(
+            height,
+            self.height_array,
+            self.solid_fraction_array,
+            right=1 - self.frozen_gas_fraction,
+        )
+
+    def liquid_fraction(self, height):
+        return np.interp(height, self.height_array, self.liquid_fraction_array, right=0)
+
+    def gas_fraction(self, height):
+        return np.interp(
+            height,
+            self.height_array,
+            self.gas_fraction_array,
+            left=0,
+            right=self.frozen_gas_fraction,
+        )
+
+    def liquid_darcy_velocity(self, height):
+        return np.interp(
+            height, self.height_array, self.liquid_darcy_velocity_array, right=0
+        )
+
+    def gas_darcy_velocity(self, height):
+        return np.interp(
+            height, self.height_array, self.gas_darcy_velocity_array, left=0, right=0
+        )
+
+    def gas_density(self, height):
+        gas_density_filtered = np.where(
+            self.gas_fraction_array <= 0, np.NaN, self.gas_density_array
+        )
+        return np.interp(height, self.height_array, gas_density_filtered, left=np.NaN)
