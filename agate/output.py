@@ -38,3 +38,25 @@ class NonDimensionalResults:
             solution_object, "mushy_layer_depth"
         )[0]
         self.height_array = solution_object.x
+
+        # Calculate all mushy layer arrays
+        # TODO: Add setter method to filter gas_density <03-01-23, Joe Fishlock> #
+        model = non_dimensional_parameters.create_model()
+        (
+            self.solid_salinity_array,
+            self.liquid_salinity_array,
+            self.solid_fraction_array,
+            self.liquid_fraction_array,
+            self.gas_fraction_array,
+            self.gas_density_array,
+            self.liquid_darcy_velocity_array,
+            self.gas_darcy_velocity_array,
+        ) = model.calculate_all_variables(
+            temperature=self.temperature_array,
+            temperature_derivative=self.temperature_derivative_array,
+            dissolved_gas_concentration=self.concentration_array,
+            hydrostatic_pressure=self.hydrostatic_pressure_array,
+            frozen_gas_fraction=self.frozen_gas_fraction,
+            mushy_layer_depth=self.mushy_layer_depth,
+            height=self.height_array,
+        )
