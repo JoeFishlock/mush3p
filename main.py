@@ -14,9 +14,10 @@ if not os.path.exists("data"):
 
 base = PhysicalParams("base", model_choice="full")
 incompressible = PhysicalParams("incompressible", model_choice="incompressible")
+ideal = PhysicalParams("ideal", model_choice="ideal")
 
 simulations = []
-for params in [base, incompressible]:
+for params in [base, incompressible, ideal]:
     params.bubble_radius = 1e-3
     simulations.append(solve(params.non_dimensionalise()))
 
