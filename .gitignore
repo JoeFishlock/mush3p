@@ -3,3 +3,5 @@ dev/*
 **/__pycache__/*
 sandbox.py
 data/*
+figures/*
+.DS_Store

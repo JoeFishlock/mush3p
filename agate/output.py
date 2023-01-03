@@ -21,6 +21,7 @@ class NonDimensionalResults:
     """class to store non-dimensional results of a simulation"""
 
     def __init__(self, non_dimensional_parameters):
+        self.name = non_dimensional_parameters.name
         solution_object = non_dimensional_parameters.solve()
         self.params = non_dimensional_parameters
         self.temperature_array = get_array_from_solution(solution_object, "temperature")

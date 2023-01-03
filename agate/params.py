@@ -84,10 +84,7 @@ class PhysicalParams:
         return cls(**params)
 
     def save(self, filename: str) -> None:
-        data_path = "data"
-        if not os.path.exists(data_path):
-            os.makedirs(data_path)
-        json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
+        json.dump(self.params, open(f"{filename}.json", "w"))
 
     @property
     def concentration_ratio(self) -> float:
@@ -220,10 +217,7 @@ class NonDimensionalParams:
         return cls(**params)
 
     def save(self, filename: str) -> None:
-        data_path = "data"
-        if not os.path.exists(data_path):
-            os.makedirs(data_path)
-        json.dump(self.params, open(f"{data_path}/{filename}.json", "w"))
+        json.dump(self.params, open(f"{filename}.json", "w"))
 
     def create_model(self):
         return MODEL_OPTIONS[self.model_choice](self)
