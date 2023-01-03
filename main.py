@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scienceplots
 from agate.params import PhysicalParams
-from agate.output import NonDimensionalResults
+from agate.solver import solve
 
 plt.style.use(["science", "nature", "high-contrast", "grid"])
 
@@ -17,7 +17,8 @@ for i, bubble_radius in enumerate([1e-4, 5e-4, 1e-3]):
     params = PhysicalParams(f"RAD{i}", bubble_radius=bubble_radius)
     params.save(f"data/{params.name}")
     params_nd = params.non_dimensionalise()
-    outputs.append(NonDimensionalResults(params_nd))
+    params_nd.save(f"data/{params_nd.name}_nd")
+    outputs.append(solve(params_nd))
 
 
 z = np.linspace(-1, 0, 100)

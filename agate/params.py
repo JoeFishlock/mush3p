@@ -83,7 +83,7 @@ class PhysicalParams:
         return cls(**params)
 
     def save(self, filename: str) -> None:
-        json.dump(self.params, open(f"{filename}.json", "w"))
+        json.dump(self.params, open(f"{filename}.json", "w"), indent=4)
 
     @property
     def concentration_ratio(self) -> float:
@@ -215,26 +215,7 @@ class NonDimensionalParams:
         return cls(**params)
 
     def save(self, filename: str) -> None:
-        json.dump(self.params, open(f"{filename}.json", "w"))
+        json.dump(self.params, open(f"{filename}.json", "w"), indent=4)
 
     def create_model(self):
         return MODEL_OPTIONS[self.model_choice](self)
-
-    def solve(self) -> Any:
-        if self.model_choice != "full":
-            raise ValueError("Only full model is implemented")
-
-        model = self.create_model()
-        solution_object = solve_bvp(
-            model.ode_fun,
-            model.boundary_conditions,
-            model.INITIAL_HEIGHT,
-            model.INITIAL_VARIABLES,
-            verbose=0,
-        )
-        if solution_object.success:
-            return solution_object
-        else:
-            raise RuntimeError(
-                f"Could not solve {self.name}.\nSolver exited with:\n{solution_object.message}"
-            )

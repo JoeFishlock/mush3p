@@ -5,3 +5,4 @@ sandbox.py
 data/*
 figures/*
 .DS_Store
+*.json

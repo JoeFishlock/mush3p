@@ -1,49 +1,36 @@
 """Class for storing simulation output"""
 import numpy as np
-
-
-def get_array_from_solution(solution_object, variable):
-    variables = {
-        "temperature": 0,
-        "temperature_derivative": 1,
-        "concentration": 2,
-        "hydrostatic_pressure": 3,
-        "frozen_gas_fraction": 4,
-        "mushy_layer_depth": 5,
-    }
-    if variable not in variables.keys():
-        raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
-
-    return solution_object.y[variables[variable]]
+import json
+from dataclasses import asdict
+from agate.params import NonDimensionalParams
 
 
 class NonDimensionalResults:
     """class to store non-dimensional results of a simulation"""
 
-    def __init__(self, non_dimensional_parameters):
+    def __init__(
+        self,
+        non_dimensional_parameters,
+        temperature_array,
+        temperature_derivative_array,
+        concentration_array,
+        hydrostatic_pressure_array,
+        frozen_gas_fraction,
+        mushy_layer_depth,
+        height_array,
+    ):
         self.name = non_dimensional_parameters.name
-        solution_object = non_dimensional_parameters.solve()
         self.params = non_dimensional_parameters
-        self.temperature_array = get_array_from_solution(solution_object, "temperature")
-        self.temperature_derivative_array = get_array_from_solution(
-            solution_object, "temperature_derivative"
-        )
-        self.concentration_array = get_array_from_solution(
-            solution_object, "concentration"
-        )
-        self.hydrostatic_pressure_array = get_array_from_solution(
-            solution_object, "hydrostatic_pressure"
-        )
-        self.frozen_gas_fraction = get_array_from_solution(
-            solution_object, "frozen_gas_fraction"
-        )[-1]
-        self.mushy_layer_depth = get_array_from_solution(
-            solution_object, "mushy_layer_depth"
-        )[0]
-        self.height_array = solution_object.x
+
+        self.temperature_array = np.array(temperature_array)
+        self.temperature_derivative_array = np.array(temperature_derivative_array)
+        self.concentration_array = np.array(concentration_array)
+        self.hydrostatic_pressure_array = np.array(hydrostatic_pressure_array)
+        self.frozen_gas_fraction = frozen_gas_fraction
+        self.mushy_layer_depth = mushy_layer_depth
+        self.height_array = np.array(height_array)
 
         # Calculate all mushy layer arrays
-        # TODO: Add setter method to filter gas_density <03-01-23, Joe Fishlock> #
         model = non_dimensional_parameters.create_model()
         (
             self.solid_salinity_array,
@@ -63,6 +50,28 @@ class NonDimensionalResults:
             mushy_layer_depth=self.mushy_layer_depth,
             height=self.height_array,
         )
+
+    def save(self, filename: str) -> None:
+        data = {
+            "non_dimensional_parameters": asdict(self.params),
+            "temperature_array": self.temperature_array.tolist(),
+            "temperature_derivative_array": self.temperature_derivative_array.tolist(),
+            "concentration_array": self.concentration_array.tolist(),
+            "hydrostatic_pressure_array": self.hydrostatic_pressure_array.tolist(),
+            "frozen_gas_fraction": self.frozen_gas_fraction,
+            "mushy_layer_depth": self.mushy_layer_depth,
+            "height_array": self.height_array.tolist(),
+        }
+        with open(f"{filename}.json", "w") as fp:
+            json.dump(data, fp, indent=4)
+
+    @classmethod
+    def load(cls, filename: str):
+        with open(f"{filename}.json", "r") as fp:
+            data = json.load(fp)
+        params = data["non_dimensional_parameters"]
+        data["non_dimensional_parameters"] = NonDimensionalParams(**params)
+        return cls(**data)
 
     def liquid_salinity(self, height):
         return np.interp(
