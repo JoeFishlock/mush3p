@@ -59,7 +59,7 @@ The steady ODE equations to be solved are
   + W_l \frac{\mathrm{d}\theta}{\mathrm{d}z}
   =  \text{St} \frac{\mathrm{d}\phi_s}{\mathrm{d}z}
   + \frac{\mathrm{d}}{\mathrm{d}z}
-  + \left( \left[ \phi_s + \phi_l + \nu_g \phi_g \right] \frac{\mathrm{d}\theta}{\mathrm{d}z} \right),
+  \left( \left[ \phi_s + \phi_l + \nu_g \phi_g \right] \frac{\mathrm{d}\theta}{\mathrm{d}z} \right),
 ```
 
 ```math
