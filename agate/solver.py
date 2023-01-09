@@ -41,15 +41,34 @@ def solve(non_dimensional_params):
     temperature_derivative_array = get_array_from_solution(
         solution_object, "temperature_derivative"
     )
-    concentration_array = get_array_from_solution(solution_object, "concentration")
-    hydrostatic_pressure_array = get_array_from_solution(
-        solution_object, "hydrostatic_pressure"
-    )
-    frozen_gas_fraction = get_array_from_solution(
-        solution_object, "frozen_gas_fraction"
-    )[-1]
-    mushy_layer_depth = get_array_from_solution(solution_object, "mushy_layer_depth")[0]
+
+    if non_dimensional_params.model_choice == "instant":
+        hydrostatic_pressure_array = solution_object.y[2]
+        frozen_gas_fraction = solution_object.y[3][-1]
+        mushy_layer_depth = solution_object.y[4][0]
+    else:
+        hydrostatic_pressure_array = get_array_from_solution(
+            solution_object, "hydrostatic_pressure"
+        )
+        frozen_gas_fraction = get_array_from_solution(
+            solution_object, "frozen_gas_fraction"
+        )[-1]
+        mushy_layer_depth = get_array_from_solution(
+            solution_object, "mushy_layer_depth"
+        )[0]
+
     height_array = solution_object.x
+
+    # Need to make this distinction as instant model doesn't solve ode for concentration
+    # TODO: refactor to remove this if statement <09-01-23, Joe Fishlock> #
+    if non_dimensional_params.model_choice == "instant":
+        solid_fraction = model.calculate_solid_fraction(temperature=temperature_array)
+        liquid_fraction = model.calculate_liquid_fraction(solid_fraction=solid_fraction)
+        concentration_array = model.calculate_dissolved_gas_concentration(
+            liquid_fraction=liquid_fraction
+        )
+    else:
+        concentration_array = get_array_from_solution(solution_object, "concentration")
 
     return NonDimensionalResults(
         non_dimensional_parameters=non_dimensional_params,

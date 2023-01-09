@@ -16,9 +16,10 @@ base = PhysicalParams("full", model_choice="full")
 incompressible = PhysicalParams("incompressible", model_choice="incompressible")
 ideal = PhysicalParams("ideal", model_choice="ideal")
 reduced = PhysicalParams("reduced", model_choice="reduced")
+instant = PhysicalParams("instant_nucleation", model_choice="instant")
 
 simulations = []
-for params in [base, incompressible, ideal, reduced]:
+for params in [base, incompressible, ideal, reduced, instant]:
     params.bubble_radius = 1e-3
     simulations.append(solve(params.non_dimensionalise()))
 
