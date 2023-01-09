@@ -6,3 +6,5 @@ data/*
 figures/*
 .DS_Store
 *.json
+build/*
+*egg-info**
