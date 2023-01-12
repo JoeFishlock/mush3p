@@ -1,2 +1,2 @@
 # Models #
-![image](steady_state_model_hierachy.pdf)
+![image](steady_state_model_hierachy.jpg)
