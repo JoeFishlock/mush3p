@@ -128,7 +128,7 @@ class NonDimensionalResults:
 
     def liquid_darcy_velocity(self, height):
         return np.interp(
-            height, self.height_array, self.liquid_darcy_velocity_array, right=0
+            height, self.height_array, self.liquid_darcy_velocity_array, right=np.NaN
         )
 
     def gas_darcy_velocity(self, height):
