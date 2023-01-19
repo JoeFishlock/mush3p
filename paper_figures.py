@@ -64,25 +64,30 @@ plt.close()
 
 """fig 2
 full model default behaviour for gas fraction and concentration."""
-fig = plt.figure(constrained_layout=True)
-gs = fig.add_gridspec(ncols=2, nrows=1)
+fig = plt.figure(figsize=(4.5, 3.5), constrained_layout=True)
+gs = fig.add_gridspec(ncols=3, nrows=1)
 ax_left = plt.subplot(gs[0, 0])
 ax_right = plt.subplot(gs[0, 1], sharey=ax_left)
+ax_end = plt.subplot(gs[0, 2], sharey=ax_left)
 ax_left.plot(results_gas.concentration(height), height, GREEN)
 ax_right.plot(results_gas.gas_fraction(height) * 100, height, GREEN)
+ax_end.plot(results.gas_density(height), height, GREEN)
 fig.suptitle(r"Simulation of steady mushy layer containing dissolved gas")
 ax_left.set_xlabel(r"Dissolved gas concentration $\omega$")
 ax_right.set_xlabel(r"Gas fraction $\phi_g$ (\%)")
+ax_end.set_xlabel(r"Gas density change $\psi$")
 ax_left.set_ylabel(r"Scaled height $\eta$")
 ax_left.set_xlim(0.99, 1.1)
 ax_left.set_ylim(-2, 1)
 ax_right.set_xlim(-0.1, 3)
-for ax in [ax_right, ax_left]:
+ax_end.set_xlim(1.0, 1.10)
+for ax in [ax_right, ax_left, ax_end]:
     ax.fill_between([-100, 110], -1, -3, color="#004488", alpha=0.2)
     ax.fill_between([-100, 110], -1, 0, color="#DDAA33", alpha=0.2)
     ax.fill_between([-100, 110], 0, 1, color="#BB5566", alpha=0.2)
 
 plt.setp(ax_right.get_yticklabels(), visible=False)
+plt.setp(ax_end.get_yticklabels(), visible=False)
 plt.savefig("data/gas_results.pdf")
 plt.close()
 
@@ -101,7 +106,7 @@ for parameters in [full, incompressible, thermally_ideal, reduced, instant_nucle
     parameters = parameters.non_dimensionalise()
     list_of_results.append(solve(parameters))
 
-fig = plt.figure(figsize=(5,5), constrained_layout=True)
+fig = plt.figure(figsize=(5, 5), constrained_layout=True)
 gs = fig.add_gridspec(ncols=2, nrows=2)
 ax1 = plt.subplot(gs[0, 0])
 ax2 = plt.subplot(gs[0, 1], sharey=ax1)
