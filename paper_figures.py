@@ -15,13 +15,11 @@ if not os.path.exists("data"):
 
 base = PhysicalParams(name="no gas", model_choice="full")
 base = base.non_dimensionalise()
-base.bubble_radius_scaled = 1
 base.far_dissolved_concentration_scaled = 0
 results = solve(base)
 
 gas_flow = PhysicalParams(name="saturated", model_choice="full")
 gas_flow = gas_flow.non_dimensionalise()
-gas_flow.bubble_radius_scaled = 1
 results_gas = solve(gas_flow)
 
 height = np.linspace(-2, 1, 1000)

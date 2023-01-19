@@ -28,7 +28,7 @@ class PhysicalParams:
     far_dissolved_gas_concentration: float = 3.71e-5  # kg/kg
     specific_gas_constant: float = 286  # J/kg degK
     reference_velocity: float = 3e-6  # m/s
-    bubble_radius: float = 1e-4  # m
+    bubble_radius: float = 1e-3  # m
     reference_pore_scale: float = 1e-3  # m
     gravitational_acceleration: float = 9.81  # m/s2
     liquid_dynamic_viscosity: float = 1.906e-3  # kg/m s
