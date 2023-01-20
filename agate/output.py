@@ -133,7 +133,11 @@ class NonDimensionalResults:
 
     def gas_darcy_velocity(self, height):
         return np.interp(
-            height, self.height_array, self.gas_darcy_velocity_array, left=0, right=0
+            height,
+            self.height_array,
+            self.gas_darcy_velocity_array,
+            left=np.NaN,
+            right=0,
         )
 
     def gas_density(self, height):
