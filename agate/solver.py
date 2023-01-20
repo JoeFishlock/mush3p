@@ -18,7 +18,7 @@ def get_array_from_solution(solution_object, variable):
     return solution_object.y[variables[variable]]
 
 
-def solve(non_dimensional_params):
+def solve(non_dimensional_params, max_nodes=1000):
     if non_dimensional_params.model_choice not in MODEL_OPTIONS.keys():
         raise ValueError(
             f"model_choice must be one of the implemented: {MODEL_OPTIONS.keys()}"
@@ -30,6 +30,7 @@ def solve(non_dimensional_params):
         model.boundary_conditions,
         model.INITIAL_HEIGHT,
         model.INITIAL_VARIABLES,
+        max_nodes=max_nodes,
         verbose=0,
     )
     if not solution_object.success:
