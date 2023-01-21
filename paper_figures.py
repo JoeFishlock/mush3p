@@ -8,8 +8,9 @@ from agate.params import PhysicalParams
 from agate.solver import solve
 
 plt.style.use(["science", "nature", "grid"])
-GREEN = "#228833"
-TEAL = "#009988"
+
+GREEN = "#117733"
+TEAL = "#44AA99"
 ORANGE = "#EE7733"
 RED = "#CC3311"
 MAGENTA = "#EE3377"
@@ -17,130 +18,85 @@ HIGH_BLUE = "#004488"
 HIGH_YELLOW = "#DDAA33"
 HIGH_RED = "#BB5566"
 GREY = "#BBBBBB"
+OLIVE = "#999933"
+SAND = "#DDCC77"
 
 
-def shade_regions(list_of_axes):
+def shade_regions(list_of_axes, height):
     for ax in list_of_axes:
-        ax.fill_between([-100, 110], -1, -3, color="w", alpha=0)
-        ax.fill_between([-100, 110], -1, 0, color=GREY, alpha=0.2)
-        ax.fill_between([-100, 110], 0, 1, color="k", alpha=0.2)
+        bottom = np.min(height)
+        top = np.max(height)
+        ax.axhspan(-1, bottom, facecolor="w", alpha=0)
+        ax.axhspan(-1, 0, facecolor=GREY, alpha=0.2)
+        ax.axhspan(0, top, facecolor="k", alpha=0.2)
 
 
 if not os.path.exists("data"):
     os.makedirs("data")
 
 """fig 1 
-full model comparison of gas and no gas for temperature, solid fraction and liquid
-darcy velocity."""
-base = PhysicalParams(name="no gas", model_choice="full")
-base = base.non_dimensionalise()
-base.far_dissolved_concentration_scaled = 0
-results = solve(base)
+Comparing:
+full model with no gas (black)
+full model with gas (green)
+reduced model with gas (sand)."""
+full_no_gas = PhysicalParams(
+    name="full-no-gas", model_choice="full"
+).non_dimensionalise()
+full_no_gas.far_dissolved_concentration_scaled = 0
+full_saturated = PhysicalParams(
+    name="full-saturated", model_choice="full"
+).non_dimensionalise()
+reduced_saturated = PhysicalParams(
+    name="reduced-saturated", model_choice="reduced"
+).non_dimensionalise()
 
-gas_flow = PhysicalParams(name="saturated", model_choice="full")
-gas_flow = gas_flow.non_dimensionalise()
-results_gas = solve(gas_flow)
+results = []
+for parameters in [full_no_gas, full_saturated, reduced_saturated]:
+    results.append(solve(parameters))
 
-height = np.linspace(-2, 1, 1000)
+height = np.linspace(-2, 0.5, 1000)
+colors = ["k", GREEN, SAND]
+styles = ["solid", "dotted", "dashed"]
 
-fig = plt.figure(figsize=(4.5, 3.5), constrained_layout=True)
-gs = fig.add_gridspec(ncols=3, nrows=1)
-ax_left = plt.subplot(gs[0, 0])
-ax_right = plt.subplot(gs[0, 1], sharey=ax_left)
-ax_end = plt.subplot(gs[0, 2], sharey=ax_left)
-ax_left.plot(results_gas.temperature(height), height, GREEN, label=results_gas.name)
-ax_left.plot(results.temperature(height), height, "k", label=results.name)
-ax_left.legend()
-ax_right.plot(results_gas.solid_fraction(height) * 100, height, GREEN)
-ax_right.plot(results.solid_fraction(height) * 100, height, "k")
-ax_end.plot(results_gas.liquid_darcy_velocity(height), height, GREEN)
-ax_end.plot(results.liquid_darcy_velocity(height), height, "k")
-fig.suptitle(r"Simulation of steady mushy layer with no dissolved gas")
-ax_left.set_xlabel(r"Non dimensional temperature $\theta$")
-ax_right.set_xlabel(r"Solid fraction $\phi_s$ (\%)")
-ax_end.set_xlabel(r"Liquid Darcy velocity $W_l$")
-ax_left.set_ylabel(r"Scaled height $\eta$")
-ax_left.set_xlim(-1.1, 0.1)
-ax_left.set_ylim(-2, 1)
-ax_right.set_xlim(-10, 110)
-ax_end.set_xlim(-0.03, 0.005)
-shade_regions([ax_right, ax_left, ax_end])
-plt.setp(ax_right.get_yticklabels(), visible=False)
-plt.setp(ax_end.get_yticklabels(), visible=False)
-plt.savefig("data/base_results.pdf")
-plt.close()
+colors.reverse()
+results.reverse()
 
-"""fig 2
-full model default behaviour for gas fraction and concentration."""
-fig = plt.figure(figsize=(4.5, 3.5), constrained_layout=True)
-gs = fig.add_gridspec(ncols=3, nrows=1)
-ax_left = plt.subplot(gs[0, 0])
-ax_right = plt.subplot(gs[0, 1], sharey=ax_left)
-ax_end = plt.subplot(gs[0, 2], sharey=ax_left)
-ax_left.plot(results_gas.concentration(height), height, GREEN)
-ax_right.plot(results_gas.gas_fraction(height) * 100, height, GREEN)
-ax_end.plot(results.gas_density(height), height, GREEN)
-fig.suptitle(r"Simulation of steady mushy layer containing dissolved gas")
-ax_left.set_xlabel(r"Dissolved gas concentration $\omega$")
-ax_right.set_xlabel(r"Gas fraction $\phi_g$ (\%)")
-ax_end.set_xlabel(r"Gas density change $\psi$")
-ax_left.set_ylabel(r"Scaled height $\eta$")
-ax_left.set_xlim(0.99, 1.1)
-ax_left.set_ylim(-2, 1)
-ax_right.set_xlim(-0.1, 3)
-ax_end.set_xlim(1.0, 1.10)
-shade_regions([ax_right, ax_left, ax_end])
-plt.setp(ax_right.get_yticklabels(), visible=False)
-plt.setp(ax_end.get_yticklabels(), visible=False)
-plt.savefig("data/gas_results.pdf")
-plt.close()
-
-"""fig 3
-comparison of the different models for
-solid fraction, temperature, gas fraction and liquid velocity
-for default parameters so no gas buoyant rise."""
-full = PhysicalParams(name="full", model_choice="full")
-incompressible = PhysicalParams(name="incompressible", model_choice="incompressible")
-thermally_ideal = PhysicalParams(name="thermally ideal", model_choice="ideal")
-reduced = PhysicalParams(name="reduced", model_choice="reduced")
-instant_nucleation = PhysicalParams(name="instant nucleation", model_choice="instant")
-
-list_of_results = []
-for parameters in [full, incompressible, thermally_ideal, reduced, instant_nucleation]:
-    parameters = parameters.non_dimensionalise()
-    list_of_results.append(solve(parameters))
-
-fig = plt.figure(figsize=(5, 5), constrained_layout=True)
-gs = fig.add_gridspec(ncols=2, nrows=2)
+fig = plt.figure(figsize=(5.5, 6.5), constrained_layout=True)
+gs = fig.add_gridspec(ncols=3, nrows=2)
 ax1 = plt.subplot(gs[0, 0])
 ax2 = plt.subplot(gs[0, 1], sharey=ax1)
-ax3 = plt.subplot(gs[1, 0])
-ax4 = plt.subplot(gs[1, 1], sharey=ax3)
+ax3 = plt.subplot(gs[0, 2], sharey=ax1)
+ax4 = plt.subplot(gs[1, 0])
+ax5 = plt.subplot(gs[1, 1], sharey=ax4)
+ax6 = plt.subplot(gs[1, 2], sharey=ax4)
 
-for results, color in zip(list_of_results, ["k", "--b", "g", "--m", "--r"]):
-    ax1.plot(results.temperature(height), height, color, label=results.name)
-    ax2.plot(results.solid_fraction(height) * 100, height, color, label=results.name)
-    ax3.plot(results.liquid_darcy_velocity(height), height, color, label=results.name)
-    ax4.plot(results.gas_fraction(height) * 100, height, color, label=results.name)
+for result, color, style in zip(results, colors, styles):
+    kwargs = {"linestyle": style, "lw": 1.5}
+    ax1.plot(result.temperature(height), height, color, label=result.name, **kwargs)
+    ax2.plot(result.solid_fraction(height) * 100, height, color, **kwargs)
+    ax3.plot(result.liquid_darcy_velocity(height), height, color, **kwargs)
+    ax4.plot(result.concentration(height), height, color, **kwargs)
+    ax5.plot(result.gas_fraction(height) * 100, height, color, **kwargs)
+    ax6.plot(result.gas_density(height), height, color, **kwargs)
 
-fig.suptitle(r"Comparison of different models")
 ax1.legend()
-ax1.set_xlabel(r"Temperature $\theta$")
+ax1.set_xlabel(r"Non dimensional temperature $\theta$")
 ax2.set_xlabel(r"Solid fraction $\phi_s$ (\%)")
 ax3.set_xlabel(r"Liquid Darcy velocity $W_l$")
-ax4.set_xlabel(r"Gas fraction $\phi_g$ (\%)")
 ax1.set_ylabel(r"Scaled height $\eta$")
-ax3.set_ylabel(r"Scaled height $\eta$")
-ax1.set_xlim(-1.1, 0.1)
-ax2.set_xlim(-10, 110)
-ax3.set_xlim(-0.03, 0.005)
-ax4.set_xlim(-0.1, 3)
-ax1.set_ylim(-2, 1)
-ax3.set_ylim(-2, 1)
-shade_regions([ax1, ax2, ax3, ax4])
+ax4.set_xlabel(r"Dissolved gas concentration $\omega$")
+ax4.set_xlim(0.99, 1.1)
+ax5.set_xlabel(r"Gas fraction $\phi_g$ (\%)")
+ax6.set_xlabel(r"Gas density change $\psi$")
+ax4.set_ylabel(r"Scaled height $\eta$")
+shade_regions([ax2, ax1, ax3, ax4, ax5, ax6], height)
+ax1.set_ylim(np.min(height), np.max(height))
+ax4.set_ylim(np.min(height), np.max(height))
 plt.setp(ax2.get_yticklabels(), visible=False)
-plt.setp(ax4.get_yticklabels(), visible=False)
-plt.savefig("data/model_comparison.pdf")
+plt.setp(ax3.get_yticklabels(), visible=False)
+plt.setp(ax5.get_yticklabels(), visible=False)
+plt.setp(ax6.get_yticklabels(), visible=False)
+plt.savefig("data/base_results.pdf")
 plt.close()
 
 
@@ -170,6 +126,7 @@ for damkholer in [1, 5, 10, 50, 100, 500, 1000]:
     Da.append(damkholer)
     supersaturation.append(np.max(list_of_results[-1].concentration_array - 1))
 
+instant_nucleation = PhysicalParams(name="instant nucleation", model_choice="instant")
 list_of_results.append(solve(instant_nucleation.non_dimensionalise()))
 Da.append(np.inf)
 supersaturation.append(0)
@@ -210,7 +167,8 @@ ax3.set_ylim(1e-3, 3)
 ax1.set_xlim(0.9, 3.6)
 ax2.set_xlim(-0.1, 3.1)
 ax3.set_xlim(0.9, 1100)
-shade_regions([ax1, ax2])
+shade_regions([ax1, ax2], height)
+ax1.set_ylim(np.min(height), np.max(height))
 plt.setp(ax2.get_yticklabels(), visible=False)
 fig.suptitle(r"The effect of Damkohler number on gas bubble nucleation")
 plt.savefig("data/nucleation_rate.pdf")
@@ -294,7 +252,8 @@ ax3.set_ylim(-1.1, 0.1)
 ax1.set_xlim(-0.1, 3.1)
 ax2.set_xlim(-0.001, 0.026)
 ax3.set_xlim(0.1, 1.1)
-shade_regions([ax1, ax2])
+shade_regions([ax1, ax2], height)
+ax1.set_ylim(np.min(height), np.max(height))
 plt.setp(ax2.get_yticklabels(), visible=False)
 fig.suptitle(r"The effect of bubble radius on gas transport")
 plt.savefig("data/gas_cutoff.pdf")
