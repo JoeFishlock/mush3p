@@ -3,22 +3,9 @@ import numpy as np
 import json
 from dataclasses import asdict
 from agate.params import NonDimensionalParams
-from scipy.integrate import simpson
 
 GREY = "#BBBBBB"
 
-def calculate_RMSE(target_array, true_array, target_positions, true_positions):
-    target = np.interp(true_positions, target_positions, target_array)
-    diff = (target - true_array) **2
-    normal = true_array ** 2
-    numerator = simpson(diff, true_positions)
-    denominator = simpson(normal, true_positions)
-    """To test this function test easy one"""
-    # x = np.linspace(0, 1, 100)
-    # on = np.ones_like(x)
-    # calculate_RMSE(x+1, on, x, x)
-    """Answer should be sqrt(1/3)"""
-    return np.sqrt(numerator/denominator)
 
 def shade_regions(list_of_axes, height):
     for ax in list_of_axes:

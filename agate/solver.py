@@ -1,6 +1,8 @@
+import numpy as np
 from scipy.integrate import solve_bvp
 from agate.output import NonDimensionalResults
 from agate.model import MODEL_OPTIONS
+from scipy.integrate import simpson
 
 
 def get_array_from_solution(solution_object, variable):
@@ -81,3 +83,23 @@ def solve(non_dimensional_params, max_nodes=1000):
         mushy_layer_depth=mushy_layer_depth,
         height_array=height_array,
     )
+
+def calculate_RMSE(target_array, true_array, target_positions, true_positions):
+    target = np.interp(true_positions, target_positions, target_array)
+    diff = (target - true_array) **2
+    normal = true_array ** 2
+    numerator = simpson(diff, true_positions)
+    denominator = simpson(normal, true_positions)
+    """To test this function test easy one"""
+    # x = np.linspace(0, 1, 100)
+    # on = np.ones_like(x)
+    # calculate_RMSE(x+1, on, x, x)
+    """Answer should be sqrt(1/3)"""
+    return np.sqrt(numerator/denominator)
+
+def compare_model_to_full(reduced_model_results: NonDimensionalResults):
+    parameters = reduced_model_results.params
+    parameters.model_choice = "full"
+    base_results = solve(parameters)
+    print(calculate_RMSE(reduced_model_results.gas_fraction_array, base_results.gas_fraction_array, reduced_model_results.height_array, base_results.height_array))
+
