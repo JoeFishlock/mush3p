@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scienceplots
 from agate.params import PhysicalParams
-from agate.solver import solve
+from agate.solver import solve, calculate_RMSE
 from agate.output import shade_regions
 
 plt.style.use(["science", "nature", "grid"])
@@ -51,7 +51,8 @@ for damkholer in [1, 5, 10, 50, 100, 500, 1000]:
     parameters.damkholer_number = damkholer
     list_of_results.append(solve(parameters, max_nodes=5000))
     Da.append(damkholer)
-    supersaturation.append(np.max(list_of_results[-1].concentration_array - 1))
+    concentration = list_of_results[-1].concentration_array
+    supersaturation.append(np.max(concentration - 1))
 
 instant_nucleation = PhysicalParams(name="instant nucleation", model_choice="instant")
 list_of_results.append(solve(instant_nucleation.non_dimensionalise()))
@@ -77,27 +78,24 @@ for results, color in zip(list_of_results, colorbar):
         )
 
     ax2.plot(results.gas_fraction(height) * 100, height, color)
-    ax3.loglog(Da, supersaturation, "--*k")
+
+ax3.loglog(Da, supersaturation, "--*k")
+gradient_line = lambda x: (1 / x)
+gradient_line_x = np.linspace(50, 500)
+ax3.loglog(gradient_line_x, gradient_line(gradient_line_x), "r")
 
 ax1.set_xlabel(r"Dissolved gas concentration $\omega$")
 ax2.set_xlabel(r"Gas fraction $\phi_g$ (\%)")
 ax3.set_xlabel(r"Damkohler number $\text{Da}$")
 
 ax1.set_ylabel(r"Scaled height $\eta$")
-ax3.set_ylabel(r"Maximum supersaturation $\max{(\omega)} - 1$")
+ax3.set_ylabel(r"Maximum supersaturation")
 
 ax1.legend(loc="upper center", ncols=2)
 
-ax1.set_ylim(-2, 1)
-ax3.set_ylim(1e-3, 3)
-
-ax1.set_xlim(0.9, 3.6)
-ax2.set_xlim(-0.1, 3.1)
-ax3.set_xlim(0.9, 1100)
 shade_regions([ax1, ax2], height)
 ax1.set_ylim(np.min(height), np.max(height))
 plt.setp(ax2.get_yticklabels(), visible=False)
 fig.suptitle(r"The effect of Damkohler number on gas bubble nucleation")
 plt.savefig("data/nucleation_rate.pdf")
 plt.close()
-
