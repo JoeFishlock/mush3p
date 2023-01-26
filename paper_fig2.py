@@ -3,6 +3,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from mpltools import annotation
 import scienceplots
 from agate.params import PhysicalParams
 from agate.solver import solve, calculate_RMSE
@@ -80,9 +81,7 @@ for results, color in zip(list_of_results, colorbar):
     ax2.plot(results.gas_fraction(height) * 100, height, color)
 
 ax3.loglog(Da, supersaturation, "--*k")
-gradient_line = lambda x: (1 / x)
-gradient_line_x = np.linspace(50, 500)
-ax3.loglog(gradient_line_x, gradient_line(gradient_line_x), "r")
+annotation.slope_marker((100, 0.01), (-1, 1), invert=True, ax=ax3, size_frac=0.2)
 
 ax1.set_xlabel(r"Dissolved gas concentration $\omega$")
 ax2.set_xlabel(r"Gas fraction $\phi_g$ (\%)")
@@ -92,7 +91,6 @@ ax1.set_ylabel(r"Scaled height $\eta$")
 ax3.set_ylabel(r"Maximum supersaturation")
 
 ax1.legend(loc="upper center", ncols=2)
-
 shade_regions([ax1, ax2], height)
 ax1.set_ylim(np.min(height), np.max(height))
 plt.setp(ax2.get_yticklabels(), visible=False)
