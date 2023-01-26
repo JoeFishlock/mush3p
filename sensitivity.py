@@ -192,7 +192,6 @@ def sort_table(table):
             sorted_matrix[i, j] = matrix[row_index, col_index]
     sorted_inputs = [inputs[i] for i in row_indices]
     sorted_outputs = [outputs[j] for j in col_indices]
-    print(sorted_matrix)
     return sorted_inputs, sorted_outputs, sorted_matrix
 
 
