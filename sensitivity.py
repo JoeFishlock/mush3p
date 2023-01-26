@@ -28,7 +28,6 @@ SAND = "#DDCC77"
 INPUTS = [
     "concentration_ratio",
     "stefan_number",
-    "hele_shaw_permeability_scaled",
     "far_temperature_scaled",
     "damkholer_number",
     "expansion_coefficient",
@@ -57,7 +56,6 @@ OUTPUTS = [
 PARAMETER_RANGES = {
     "concentration_ratio": np.geomspace(0.1, 10, 5),
     "stefan_number": np.linspace(2, 16, 10),
-    "hele_shaw_permeability_scaled": np.geomspace(1, 100, 7),
     "far_temperature_scaled": np.geomspace(0.01, 1, 7),
     "damkholer_number": np.linspace(0, 100, 10),
     "expansion_coefficient": np.geomspace(0.001, 0.1, 7),
@@ -76,7 +74,6 @@ def convert_input(input_name):
     conversion = {
         "concentration_ratio": r"$\mathcal{C}$",
         "stefan_number": r"$\mathcal{S}$",
-        "hele_shaw_permeability_scaled": r"$\mathcal{K}$",
         "far_temperature_scaled": r"$\theta_\infty$",
         "damkholer_number": r"$\mathcal{D}$",
         "expansion_coefficient": r"$\chi$",
@@ -163,158 +160,73 @@ def calculate_table(base_non_dimensional_parameters):
                 output_name,
                 base_non_dimensional_parameters,
             )
-            outputs[convert_output(output_name)] = max_diff
-        table[convert_input(input_name)] = outputs
+            outputs[output_name] = max_diff
+        table[input_name] = outputs
 
     return table
 
 
+def convert_table_to_matrix(table):
+    inputs = []
+    outputs = []
+    for name in table["stefan_number"].keys():
+        outputs.append(name)
+
+    matrix = np.full((len(table.keys()), len(table["stefan_number"].keys())), np.NaN)
+    for i, (input_name, pair) in enumerate(table.items()):
+        inputs.append(input_name)
+        for j, (_, value) in enumerate(pair.items()):
+            matrix[i, j] = value
+    return inputs, outputs, matrix
+
+
+def sort_table(table):
+    inputs, outputs, matrix = convert_table_to_matrix(table)
+    row_indices = np.full((matrix.shape[0]), np.NaN)
+    col_indices = np.full((matrix.shape[1]), np.NaN)
+    row_indices = np.argsort(np.nansum(matrix, axis=1))[::-1]
+    col_indices = np.argsort(np.nansum(matrix, axis=0))[::-1]
+    sorted_matrix = np.full_like(matrix, np.NaN)
+    for i, row_index in enumerate(row_indices):
+        for j, col_index in enumerate(col_indices):
+            sorted_matrix[i, j] = matrix[row_index, col_index]
+    sorted_inputs = [inputs[i] for i in row_indices]
+    sorted_outputs = [outputs[j] for j in col_indices]
+    print(sorted_matrix)
+    return sorted_inputs, sorted_outputs, sorted_matrix
+
+
 def sensitivity_plot(axes, base_non_dimensional_parameters):
-    df = pd.DataFrame(calculate_table(base_non_dimensional_parameters))
-    sns.heatmap(df, annot=False, vmin=0, vmax=1, cmap="Reds", ax=axes)
+    table = calculate_table(base_non_dimensional_parameters)
+    inputs, outputs, values = sort_table(table)
+    for i, input_name in enumerate(inputs):
+        inputs[i] = convert_input(input_name)
+
+    for i, output_name in enumerate(outputs):
+        outputs[i] = convert_output(output_name)
+
+    sns.heatmap(
+        values.T,
+        vmin=0,
+        vmax=1,
+        square=True,
+        cmap="Greys",
+        ax=axes,
+        annot=True,
+        cbar=False,
+        fmt=".1e",
+        xticklabels=inputs,
+        yticklabels=outputs,
+    )
 
 
-base = PhysicalParams(name="base", model_choice="full")
-base = base.non_dimensionalise()
 base_mobile = PhysicalParams(name="base_mobile", model_choice="full")
 base_mobile = base_mobile.non_dimensionalise()
 base_mobile.bubble_radius_scaled = 0.1
-base_reduced = PhysicalParams(name="base_reduced", model_choice="reduced")
-base_reduced = base_reduced.non_dimensionalise()
-base_mobile_reduced = PhysicalParams(name="base_mobile_reduced", model_choice="reduced")
-base_mobile_reduced = base_mobile_reduced.non_dimensionalise()
-base_mobile_reduced.bubble_radius_scaled = 0.1
 
-fig = plt.figure(figsize=(8, 8), constrained_layout=True)
-gs = fig.add_gridspec(ncols=2, nrows=2)
-ax1 = plt.subplot(gs[0, 0])
-ax2 = plt.subplot(gs[0, 1])
-ax3 = plt.subplot(gs[1, 0])
-ax4 = plt.subplot(gs[1, 1])
-sensitivity_plot(ax1, base)
-sensitivity_plot(ax2, base_mobile)
-sensitivity_plot(ax3, base_reduced)
-sensitivity_plot(ax4, base_mobile_reduced)
-ax1.set_title("Full model")
-ax2.set_title("Full model with mobile gas phase")
-ax3.set_title("Reduced model")
-ax4.set_title("Reduced model with mobile gas phase")
-plt.savefig("data/heatmap.pdf")
-plt.close()
-
-fig = plt.figure(figsize=(8, 8), constrained_layout=True)
+"""Sensitivity analysis of the full model with mobile gas phase"""
+fig = plt.figure(figsize=(6, 6), constrained_layout=True)
 ax1 = plt.gca()
 sensitivity_plot(ax1, base_mobile)
-ax1.set_title("Full model with mobile gas phase")
 plt.savefig("data/heatmap_full.pdf")
 plt.close()
-
-
-# def sensitivity_analysis(axes, parameter_string, parameter_range):
-#     base = PhysicalParams("base", model_choice="full")
-#     base = base.non_dimensionalise()
-#     base_result = solve(base)
-
-#     for num, value in enumerate(parameter_range):
-#         parameters = PhysicalParams(f"sim{num}", model_choice="full")
-#         parameters = parameters.non_dimensionalise()
-#         parameters.__dict__[parameter_string] = value
-#         result = solve(parameters)
-
-#         axes.plot(
-#             1,
-#             calculate_RMSE(
-#                 result.concentration_array,
-#                 base_result.concentration_array,
-#                 result.height_array,
-#                 base_result.height_array,
-#             ),
-#             TEAL,
-#             marker="*",
-#             linestyle="",
-#         )
-#         axes.plot(
-#             2,
-#             calculate_RMSE(
-#                 result.temperature_array,
-#                 base_result.temperature_array,
-#                 result.height_array,
-#                 base_result.height_array,
-#             ),
-#             ORANGE,
-#             marker="*",
-#             linestyle="",
-#         )
-#         axes.plot(
-#             3,
-#             calculate_RMSE(
-#                 result.solid_fraction_array,
-#                 base_result.solid_fraction_array,
-#                 result.height_array,
-#                 base_result.height_array,
-#             ),
-#             MAGENTA,
-#             marker="*",
-#             linestyle="",
-#         )
-#         axes.plot(
-#             4,
-#             calculate_RMSE(
-#                 result.gas_fraction_array,
-#                 base_result.gas_fraction_array,
-#                 result.height_array,
-#                 base_result.height_array,
-#             ),
-#             GREEN,
-#             marker="*",
-#             linestyle="",
-#         )
-#         axes.plot(
-#             5,
-#             calculate_RMSE(
-#                 result.liquid_darcy_velocity_array,
-#                 base_result.liquid_darcy_velocity_array,
-#                 result.height_array,
-#                 base_result.height_array,
-#             ),
-#             OLIVE,
-#             marker="*",
-#             linestyle="",
-#         )
-#         axes.plot(
-#             6,
-#             calculate_RMSE(
-#                 result.gas_density_array,
-#                 base_result.gas_density_array,
-#                 result.height_array,
-#                 base_result.height_array,
-#             ),
-#             SAND,
-#             marker="*",
-#             linestyle="",
-#         )
-#     # bottom, top = axes.get_ylim()
-#     # axes.set_ylim(0, max(top, 1))
-
-
-# fig = plt.figure(figsize=(4, 5), constrained_layout=True)
-# gs = fig.add_gridspec(nrows=5, ncols=1)
-# ax1 = plt.subplot(gs[0, 0])
-# ax2 = plt.subplot(gs[1, 0])
-# ax3 = plt.subplot(gs[2, 0])
-# ax4 = plt.subplot(gs[3, 0])
-# ax5 = plt.subplot(gs[4, 0])
-# sensitivity_analysis(ax1, "gas_conductivity_ratio", np.linspace(0, 1, 5))
-# sensitivity_analysis(ax2, "damkholer_number", np.linspace(0, 70, 5))
-# sensitivity_analysis(ax3, "expansion_coefficient", np.geomspace(1e-4, 1e-2, 5))
-# sensitivity_analysis(ax4, "bubble_radius_scaled", np.geomspace(1e-4, 10, 10))
-# sensitivity_analysis(ax5, "stefan_number", np.linspace(1, 16, 10))
-# ax1.set_title("gas_conductivity_ratio")
-# ax2.set_title("damkholer_number")
-# ax3.set_title("expansion_coefficient")
-# ax4.set_title("bubble_radius_scaled")
-# ax5.set_title("stefan_number")
-# # TODO: Make them all share an x axis and use labels for the quantities
-# # <22-01-23, Joe Fishlock> #
-# plt.savefig("data/sensitivity.pdf")
-# # TODO: group variables by gas or not to do with gas <22-01-23, Joe Fishlock> #
