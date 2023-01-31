@@ -70,7 +70,8 @@ for result, color, style in zip(results, colors, styles):
     ax3.plot(result.liquid_darcy_velocity(height), height, color, **kwargs)
     ax4.plot(result.concentration(height), height, color, **kwargs)
     ax5.plot(result.gas_fraction(height) * 100, height, color, **kwargs)
-    ax6.plot(result.gas_density(height), height, color, **kwargs)
+    if result.name != "full-no-gas":
+        ax6.plot(result.gas_density(height), height, color, **kwargs)
 
 ax1.legend()
 ax1.set_xlabel(r"Non dimensional temperature $\theta$")
@@ -91,4 +92,3 @@ plt.setp(ax5.get_yticklabels(), visible=False)
 plt.setp(ax6.get_yticklabels(), visible=False)
 plt.savefig("data/base_results.pdf")
 plt.close()
-
