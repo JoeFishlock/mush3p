@@ -221,7 +221,7 @@ def sensitivity_plot(axes, base_non_dimensional_parameters):
 
 base_mobile = PhysicalParams(name="base_mobile", model_choice="full")
 base_mobile = base_mobile.non_dimensionalise()
-base_mobile.bubble_radius_scaled = 0.1
+base_mobile.bubble_radius_scaled = 0.6
 
 """Sensitivity analysis of the full model with mobile gas phase"""
 fig = plt.figure(figsize=(6, 6), constrained_layout=True)
