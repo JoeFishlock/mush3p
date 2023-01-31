@@ -227,5 +227,5 @@ base_mobile.bubble_radius_scaled = 0.6
 fig = plt.figure(figsize=(6, 6), constrained_layout=True)
 ax1 = plt.gca()
 sensitivity_plot(ax1, base_mobile)
-plt.savefig("data/heatmap_full.pdf")
+plt.savefig("data/heatmap.pdf")
 plt.close()
