@@ -61,8 +61,8 @@ def critical_temp(R_B):
     lam = R_B / throat_scale
 
     temp = parameters.concentration_ratio * (1 - (1 / (lam**2)))
-    temp = np.where(temp < -1, np.NaN, temp)
-    temp = np.where(temp > 0, np.NaN, temp)
+    temp = np.where(temp < -1, -1, temp)
+    temp = np.where(temp > 0, 0, temp)
     return temp
 
 
@@ -86,16 +86,22 @@ for results, color, size in zip(list_of_results, colorbar, sizes):
     )
     ax3.plot(size * 1000, critical_temp(size), color, marker="*", linestyle="")
 
+xaxis = np.linspace(0.01, 1.1, 30)
+ax3.fill_between(xaxis, critical_temp(xaxis * 1e-3), -1, ec=None, fc=GREY)
+ax3.fill_between(xaxis, 1, 0, ec="k", fc="none", linewidth=0.0, hatch="////")
+ax3.fill_between(xaxis, -1, -2, ec="k", fc="none", linewidth=0.0, hatch="////")
 R_B = np.linspace(1e-5, 1e-3, 500)
 ax3.plot(R_B * 1000, critical_temp(R_B), "k", zorder=0)
-ax3.axhline(0)
-ax3.axhline(-1)
+ax3.axhline(0, linestyle="--", color="k")
+ax3.axhline(-1, linestyle="--", color="k")
+ax3.axvline(1, linestyle="dotted", color="k")
+
 ax1.set_xlabel(r"Gas fraction $\phi_g$ (\%)")
 ax2.set_xlabel(r"Gas Darcy velocity $W_g$")
 ax3.set_xlabel(r"Bubble radius $R_B$ (mm)")
 
 ax1.set_ylabel(r"Scaled height $\eta$")
-ax3.set_ylabel(r"Critical temperature $\theta_{\text{crit}}$")
+ax3.set_ylabel(r"Temperature $\theta$")
 
 h, l = ax2.get_legend_handles_labels()
 ax4.legend(h, l, loc=10, ncols=2, edgecolor=(1, 1, 1, 1))
