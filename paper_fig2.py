@@ -64,7 +64,8 @@ fig = plt.figure(figsize=(5, 5), constrained_layout=True)
 gs = fig.add_gridspec(ncols=2, nrows=3)
 ax1 = plt.subplot(gs[:2, 0])
 ax2 = plt.subplot(gs[:2, 1], sharey=ax1)
-ax3 = plt.subplot(gs[2, :])
+ax3 = plt.subplot(gs[2, 0])
+ax4 = plt.subplot(gs[2, 1])
 for results, color in zip(list_of_results, colorbar):
     if results.params.model_choice == "reduced":
         ax1.plot(
@@ -90,7 +91,10 @@ ax3.set_xlabel(r"Damkohler number $\text{Da}$")
 ax1.set_ylabel(r"Scaled height $\eta$")
 ax3.set_ylabel(r"Maximum supersaturation")
 
-ax1.legend(loc="upper center", ncols=2)
+h, l = ax1.get_legend_handles_labels()
+ax4.legend(h, l, loc=10, ncols=2, edgecolor=(1, 1, 1, 1))
+ax4.axis("off")
+
 shade_regions([ax1, ax2], height)
 ax1.set_ylim(np.min(height), np.max(height))
 plt.setp(ax2.get_yticklabels(), visible=False)

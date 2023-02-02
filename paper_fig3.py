@@ -70,7 +70,8 @@ fig = plt.figure(figsize=(5, 5), constrained_layout=True)
 gs = fig.add_gridspec(ncols=2, nrows=3)
 ax1 = plt.subplot(gs[:2, 0])
 ax2 = plt.subplot(gs[:2, 1], sharey=ax1)
-ax3 = plt.subplot(gs[2, :])
+ax3 = plt.subplot(gs[2, 0])
+ax4 = plt.subplot(gs[2, 1])
 for results, color, size in zip(list_of_results, colorbar, sizes):
     ax1.plot(
         results.gas_fraction(height) * 100,
@@ -96,7 +97,9 @@ ax3.set_xlabel(r"Bubble radius $R_B$ (mm)")
 ax1.set_ylabel(r"Scaled height $\eta$")
 ax3.set_ylabel(r"Critical temperature $\theta_{\text{crit}}$")
 
-ax2.legend(loc="lower center", ncols=2)
+h, l = ax2.get_legend_handles_labels()
+ax4.legend(h, l, loc=10, ncols=2, edgecolor=(1, 1, 1, 1))
+ax4.axis("off")
 
 ax1.set_ylim(-2, 1)
 ax3.set_ylim(-1.1, 0.1)
