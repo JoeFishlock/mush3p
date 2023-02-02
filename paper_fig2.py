@@ -3,6 +3,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.transforms as mtransforms
 from mpltools import annotation
 import scienceplots
 from agate.params import PhysicalParams
@@ -98,6 +99,21 @@ ax4.axis("off")
 shade_regions([ax1, ax2], height)
 ax1.set_ylim(np.min(height), np.max(height))
 plt.setp(ax2.get_yticklabels(), visible=False)
+
+"""Label the plots"""
+for ax, label in zip([ax1, ax2, ax3], ["(a)", "(b)", "(c)"]):
+    # label physical distance to the left and up:
+    trans = mtransforms.ScaledTranslation(-20 / 72, 7 / 72, fig.dpi_scale_trans)
+    ax.text(
+        0.0,
+        1.0,
+        label,
+        transform=ax.transAxes + trans,
+        fontsize="medium",
+        va="bottom",
+        fontfamily="serif",
+    )
+
 fig.suptitle(r"The effect of Damkohler number on gas bubble nucleation")
 plt.savefig("data/nucleation_rate.pdf")
 plt.close()

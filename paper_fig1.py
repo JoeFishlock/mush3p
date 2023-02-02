@@ -3,6 +3,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.transforms as mtransforms
 import scienceplots
 from agate.params import PhysicalParams
 from agate.solver import solve
@@ -90,5 +91,22 @@ plt.setp(ax2.get_yticklabels(), visible=False)
 plt.setp(ax3.get_yticklabels(), visible=False)
 plt.setp(ax5.get_yticklabels(), visible=False)
 plt.setp(ax6.get_yticklabels(), visible=False)
+
+"""Label the plots"""
+for ax, label in zip(
+    [ax1, ax2, ax3, ax4, ax5, ax6], ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
+):
+    # label physical distance to the left and up:
+    trans = mtransforms.ScaledTranslation(-20 / 72, 7 / 72, fig.dpi_scale_trans)
+    ax.text(
+        0.0,
+        1.0,
+        label,
+        transform=ax.transAxes + trans,
+        fontsize="medium",
+        va="bottom",
+        fontfamily="serif",
+    )
+
 plt.savefig("data/base_results.pdf")
 plt.close()
