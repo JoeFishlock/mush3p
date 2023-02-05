@@ -31,13 +31,11 @@ INPUTS = [
     "far_temperature_scaled",
     "damkholer_number",
     "expansion_coefficient",
-    "stokes_rise_velocity_scaled",
     "bubble_radius_scaled",
     "far_dissolved_concentration_scaled",
     "gas_conductivity_ratio",
     "hydrostatic_pressure_scale",
     "laplace_pressure_scale",
-    "kelvin_conversion_temperature",
     "atmospheric_pressure_scaled",
 ]
 
@@ -54,36 +52,32 @@ OUTPUTS = [
 ]
 
 PARAMETER_RANGES = {
-    "concentration_ratio": np.geomspace(0.1, 10, 5),
+    "concentration_ratio": np.linspace(0.1, 10, 10),
     "stefan_number": np.linspace(2, 16, 10),
-    "far_temperature_scaled": np.geomspace(0.01, 1, 7),
+    "far_temperature_scaled": np.linspace(0.01, 1, 10),
     "damkholer_number": np.linspace(0, 100, 10),
-    "expansion_coefficient": np.geomspace(0.001, 0.1, 7),
-    "stokes_rise_velocity_scaled": np.geomspace(1, 1e7, 10),
-    "bubble_radius_scaled": np.geomspace(0.1, 1, 7),
-    "far_dissolved_concentration_scaled": np.linspace(0, 1, 7),
-    "gas_conductivity_ratio": np.linspace(0, 1, 5),
-    "hydrostatic_pressure_scale": np.geomspace(1e-5, 1e-2, 5),
-    "laplace_pressure_scale": np.geomspace(1e-5, 1e-1, 5),
-    "kelvin_conversion_temperature": np.linspace(5, 20, 5),
-    "atmospheric_pressure_scaled": np.geomspace(1e4, 1e8, 5),
+    "expansion_coefficient": np.linspace(1e-3, 1e-1, 10),
+    "bubble_radius_scaled": np.linspace(0.05, 1, 10),
+    "far_dissolved_concentration_scaled": np.linspace(0, 1, 10),
+    "gas_conductivity_ratio": np.linspace(0, 1, 10),
+    "hydrostatic_pressure_scale": np.geomspace(1e-5, 1e-1, 10),
+    "laplace_pressure_scale": np.geomspace(1e-5, 1e-1, 10),
+    "atmospheric_pressure_scaled": np.geomspace(1e4, 1e8, 10),
 }
 
 
 def convert_input(input_name):
     conversion = {
         "concentration_ratio": r"$\mathcal{C}$",
-        "stefan_number": r"$\mathcal{S}$",
+        "stefan_number": r"St",
         "far_temperature_scaled": r"$\theta_\infty$",
-        "damkholer_number": r"$\mathcal{D}$",
+        "damkholer_number": r"Da",
         "expansion_coefficient": r"$\chi$",
-        "stokes_rise_velocity_scaled": r"$\mathcal{B}$",
         "bubble_radius_scaled": r"$\Lambda$",
         "far_dissolved_concentration_scaled": r"$\omega_\infty$",
         "gas_conductivity_ratio": r"$\nu_g$",
         "hydrostatic_pressure_scale": r"$\mathcal{H}$",
         "laplace_pressure_scale": r"$\text{La}$",
-        "kelvin_conversion_temperature": r"$\theta_K$",
         "atmospheric_pressure_scaled": r"$p_0$",
     }
     return conversion[input_name]
