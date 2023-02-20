@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
 import scienceplots
 from agate.params import PhysicalParams
-from agate.solver import solve
+from agate.solver import solve, calculate_RMSE
 from agate.output import shade_regions
 
 plt.style.use(["science", "nature", "grid"])
@@ -110,3 +110,80 @@ for ax, label in zip(
 
 plt.savefig("data/base_results.pdf")
 plt.close()
+
+"""calculate the RMSE error in each quantity for the pairs of models
+ful-saturated compared with full-no-gas (1)
+and reduced-saturated compared with full-saturated (2)
+
+NOTE: gas velocity is zero for all of these simulations
+"""
+
+
+def calculate_simulation_difference(new, base):
+    delta_concentration = calculate_RMSE(
+        new.concentration_array,
+        base.concentration_array,
+        new.height_array,
+        base.height_array,
+    )
+    delta_gas_fraction = calculate_RMSE(
+        new.gas_fraction_array,
+        base.gas_fraction_array,
+        new.height_array,
+        base.height_array,
+    )
+    delta_gas_darcy_velocity = calculate_RMSE(
+        new.gas_darcy_velocity_array,
+        base.gas_darcy_velocity_array,
+        new.height_array,
+        base.height_array,
+    )
+    delta_solid_fraction = calculate_RMSE(
+        new.solid_fraction_array,
+        base.solid_fraction_array,
+        new.height_array,
+        base.height_array,
+    )
+    delta_mushy_layer_depth = np.sqrt(
+        (new.mushy_layer_depth - base.mushy_layer_depth) ** 2
+        / (base.mushy_layer_depth) ** 2
+    )
+    delta_liquid_darcy_velocity = calculate_RMSE(
+        new.liquid_darcy_velocity_array,
+        base.liquid_darcy_velocity_array,
+        new.height_array,
+        base.height_array,
+    )
+    delta_frozen_gas_fraction = np.sqrt(
+        (new.frozen_gas_fraction - base.frozen_gas_fraction) ** 2
+        / (base.frozen_gas_fraction) ** 2
+    )
+    delta_temperature = calculate_RMSE(
+        new.temperature_array,
+        base.temperature_array,
+        new.height_array,
+        base.height_array,
+    )
+    delta_gas_density = calculate_RMSE(
+        new.gas_density_array,
+        base.gas_density_array,
+        new.height_array,
+        base.height_array,
+    )
+    return (
+        delta_gas_fraction,
+        delta_gas_darcy_velocity,
+        delta_solid_fraction,
+        delta_mushy_layer_depth,
+        delta_liquid_darcy_velocity,
+        delta_frozen_gas_fraction,
+        delta_concentration,
+        delta_temperature,
+        delta_gas_density,
+    )
+
+
+reduced_saturated, full_saturated, full_no_gas = results
+"""(1) compare full_no_gas to full_saturated"""
+print(calculate_simulation_difference(full_no_gas, full_saturated))
+print(calculate_simulation_difference(reduced_saturated, full_saturated))
