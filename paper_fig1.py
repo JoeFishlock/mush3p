@@ -5,13 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
 import scienceplots
-from rich.pretty import pprint
 from tabulate import tabulate
 from agate.params import PhysicalParams
 from agate.solver import solve, calculate_RMSE
 from agate.output import shade_regions
 
-plt.style.use(["science", "nature", "grid"])
+plt.style.use(["science", "ieee", "grid"])
 
 GREEN = "#117733"
 TEAL = "#44AA99"
@@ -51,13 +50,8 @@ for parameters in [full_no_gas, full_saturated, reduced_saturated]:
     results.append(solve(parameters))
 
 height = np.linspace(-2, 0.5, 1000)
-colors = ["k", GREEN, SAND]
-styles = ["solid", "dotted", "dashed"]
 
-colors.reverse()
-results.reverse()
-
-fig = plt.figure(figsize=(5, 5), constrained_layout=True)
+fig = plt.figure(figsize=(6, 6), constrained_layout=True)
 gs = fig.add_gridspec(ncols=3, nrows=2)
 ax1 = plt.subplot(gs[0, 0])
 ax2 = plt.subplot(gs[0, 1], sharey=ax1)
@@ -66,26 +60,28 @@ ax4 = plt.subplot(gs[1, 0])
 ax5 = plt.subplot(gs[1, 1], sharey=ax4)
 ax6 = plt.subplot(gs[1, 2], sharey=ax4)
 
-for result, color, style in zip(results, colors, styles):
-    kwargs = {"linestyle": style, "lw": 1.5}
-    ax1.plot(result.temperature(height), height, color, label=result.name, **kwargs)
-    ax2.plot(result.solid_fraction(height) * 100, height, color, **kwargs)
-    ax3.plot(result.liquid_darcy_velocity(height), height, color, **kwargs)
-    ax4.plot(result.concentration(height), height, color, **kwargs)
-    ax5.plot(result.gas_fraction(height) * 100, height, color, **kwargs)
+for result in results:
+    print(result.name)
+    ax1.plot(result.temperature(height), height, label=result.name)
+    ax2.plot(result.solid_fraction(height) * 100, height)
+    ax3.plot(result.liquid_darcy_velocity(height), height)
+    ax4.plot(result.concentration(height), height)
+    ax5.plot(result.gas_fraction(height) * 100, height)
     if result.name != "full-no-gas":
-        ax6.plot(result.gas_density(height), height, color, **kwargs)
+        ax6.plot(result.gas_density(height), height)
+    else:
+        ax6.plot(np.NaN * result.gas_density(height), height)
 
-ax1.legend()
-ax1.set_xlabel(r"Non dimensional temperature $\theta$")
-ax2.set_xlabel(r"Solid fraction $\phi_s$ (\%)")
-ax3.set_xlabel(r"Liquid Darcy velocity $W_l$")
-ax1.set_ylabel(r"Scaled height $\eta$")
-ax4.set_xlabel(r"Dissolved gas concentration $\omega$")
+ax1.legend(loc=3)
+ax1.set_xlabel(r"temperature $\theta$")
+ax2.set_xlabel(r"solid fraction $\phi_s$ (\%)")
+ax3.set_xlabel(r"liquid Darcy velocity $W_l$")
+ax1.set_ylabel(r"scaled height $\eta$")
+ax4.set_xlabel(r"dissolved gas concentration $\omega$")
 ax4.set_xlim(0.99, 1.1)
-ax5.set_xlabel(r"Gas fraction $\phi_g$ (\%)")
-ax6.set_xlabel(r"Gas density change $\psi$")
-ax4.set_ylabel(r"Scaled height $\eta$")
+ax5.set_xlabel(r"gas fraction $\phi_g$ (\%)")
+ax6.set_xlabel(r"gas density change $\psi$")
+ax4.set_ylabel(r"scaled height $\eta$")
 shade_regions([ax2, ax1, ax3, ax4, ax5, ax6], height)
 ax1.set_ylim(np.min(height), np.max(height))
 ax4.set_ylim(np.min(height), np.max(height))
@@ -187,7 +183,7 @@ def calculate_simulation_difference(new, base):
     return report
 
 
-reduced_saturated, full_saturated, full_no_gas = results
+full_no_gas, full_saturated, reduced_saturated = results
 """Run comparisons and print table"""
 report1 = calculate_simulation_difference(full_no_gas, full_saturated)
 report2 = calculate_simulation_difference(reduced_saturated, full_saturated)
