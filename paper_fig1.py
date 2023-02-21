@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
 import scienceplots
+from rich.pretty import pprint
+from tabulate import tabulate
 from agate.params import PhysicalParams
 from agate.solver import solve, calculate_RMSE
 from agate.output import shade_regions
@@ -170,20 +172,24 @@ def calculate_simulation_difference(new, base):
         new.height_array,
         base.height_array,
     )
-    return (
-        delta_gas_fraction,
-        delta_gas_darcy_velocity,
-        delta_solid_fraction,
-        delta_mushy_layer_depth,
-        delta_liquid_darcy_velocity,
-        delta_frozen_gas_fraction,
-        delta_concentration,
-        delta_temperature,
-        delta_gas_density,
-    )
+    report = {
+        "comparison": f"{new.name} to {base.name}",
+        "gas fraction": f"{delta_gas_fraction:.5f}",
+        "gas Darcy velocity": f"{delta_gas_darcy_velocity:.5f}",
+        "solid fraction": f"{delta_solid_fraction:.5f}",
+        "mushy layer depth": f"{delta_mushy_layer_depth:.5f}",
+        "liquid Darcy velocity": f"{delta_liquid_darcy_velocity:.5f}",
+        "frozen gas fraction": f"{delta_frozen_gas_fraction:.5f}",
+        "dissolved gas concentration": f"{delta_concentration:.5f}",
+        "temperature": f"{delta_temperature:.5f}",
+        "gas density": f"{delta_gas_density:.5f}",
+    }
+    return report
 
 
 reduced_saturated, full_saturated, full_no_gas = results
-"""(1) compare full_no_gas to full_saturated"""
-print(calculate_simulation_difference(full_no_gas, full_saturated))
-print(calculate_simulation_difference(reduced_saturated, full_saturated))
+"""Run comparisons and print table"""
+report1 = calculate_simulation_difference(full_no_gas, full_saturated)
+report2 = calculate_simulation_difference(reduced_saturated, full_saturated)
+table = zip(report1.keys(), report1.values(), report2.values())
+print(tabulate(table, headers="firstrow", tablefmt="fancy_grid"))
