@@ -4,8 +4,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import scienceplots
-from agate.params import PhysicalParams
-from agate.solver import solve
+from . import PhysicalParams, solve
 
 plt.style.use(["science", "nature", "grid"])
 
