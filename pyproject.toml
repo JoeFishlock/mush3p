@@ -1,3 +1,30 @@
+[tool.poetry]
+name = "agate"
+version = "0.1.0"
+description = "Python package for running steady state simulations of mushy layers with bubbles"
+authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+numpy = "^1.26.4"
+scipy = "^1.13.0"
+
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^8.1.2"
+
+
+[tool.poetry.group.scripts.dependencies]
+matplotlib = "^3.8.4"
+scienceplots = "^2.1.1"
+tabulate = "^0.9.0"
+mpltools = "^0.2.0"
+pandas = "^2.2.2"
+tqdm = "^4.66.2"
+seaborn = "^0.13.2"
+
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
