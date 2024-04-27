@@ -44,7 +44,15 @@ class NonDimensionalResults:
 
         # Calculate all mushy layer arrays
         if self.params.model_choice == "instant":
-            raise TypeError("Not implemented yet")
+            model = MODEL_OPTIONS[self.params.model_choice](
+                self.params,
+                self.height_array,
+                self.temperature_array,
+                self.temperature_derivative_array,
+                self.hydrostatic_pressure_array,
+                self.frozen_gas_fraction,
+                self.mushy_layer_depth,
+            )
         else:
             model = MODEL_OPTIONS[self.params.model_choice](
                 self.params,
@@ -56,14 +64,14 @@ class NonDimensionalResults:
                 self.frozen_gas_fraction,
                 self.mushy_layer_depth,
             )
-            self.solid_salinity_array = model.solid_salinity
-            self.liquid_salinity_array = model.liquid_salinity
-            self.solid_fraction_array = model.solid_fraction
-            self.liquid_fraction_array = model.liquid_fraction
-            self.gas_fraction_array = model.gas_fraction
-            self.gas_density_array = model.gas_density
-            self.liquid_darcy_velocity_array = model.liquid_darcy_velocity
-            self.gas_darcy_velocity_array = model.gas_darcy_velocity
+        self.solid_salinity_array = model.solid_salinity
+        self.liquid_salinity_array = model.liquid_salinity
+        self.solid_fraction_array = model.solid_fraction
+        self.liquid_fraction_array = model.liquid_fraction
+        self.gas_fraction_array = model.gas_fraction
+        self.gas_density_array = model.gas_density
+        self.liquid_darcy_velocity_array = model.liquid_darcy_velocity
+        self.gas_darcy_velocity_array = model.gas_darcy_velocity
 
     def save(self, filename: str) -> None:
         data = {

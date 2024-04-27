@@ -11,6 +11,7 @@ def get_boundary_conditions(non_dimensional_params, bottom_variables, top_variab
         "incompressible": BoundaryConditionsIncompressible,
         "ideal": BoundaryConditionsFull,
         "reduced": BoundaryConditionsReduced,
+        "instant": BoundaryConditionsInstant,
     }
     return OPTIONS[non_dimensional_params.model_choice](
         non_dimensional_params, bottom_variables, top_variables
@@ -106,6 +107,40 @@ class BoundaryConditionsReduced(BoundaryConditionsFull):
                 self.top_frozen_gas_fraction - self.top_frozen_gas,
                 self.bottom_temperature,
                 self.bottom_dissolved_gas - far_dissolved_concentration_scaled,
+                self.bottom_temperature_derivative
+                + self.bottom_mushy_layer_depth
+                * self.non_dimensional_params.far_temperature_scaled,
+            ]
+        )
+
+
+class BoundaryConditionsInstant(BoundaryConditionsReduced):
+    def __init__(self, non_dimensional_params, bottom_variables, top_variables):
+        self.non_dimensional_params = non_dimensional_params
+        (
+            self.bottom_temperature,
+            self.bottom_temperature_derivative,
+            self.bottom_hydrostatic_pressure,
+            self.bottom_frozen_gas_fraction,
+            self.bottom_mushy_layer_depth,
+        ) = bottom_variables
+        (
+            self.top_temperature,
+            self.top_temperature_derivative,
+            self.top_hydrostatic_pressure,
+            self.top_frozen_gas_fraction,
+            self.top_mushy_layer_depth,
+        ) = top_variables
+
+    @property
+    def boundary_conditions(self):
+
+        return np.array(
+            [
+                self.top_hydrostatic_pressure,
+                self.top_temperature + 1,
+                self.top_frozen_gas_fraction - self.top_frozen_gas,
+                self.bottom_temperature,
                 self.bottom_temperature_derivative
                 + self.bottom_mushy_layer_depth
                 * self.non_dimensional_params.far_temperature_scaled,
