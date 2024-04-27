@@ -5,22 +5,7 @@ from agate.output import NonDimensionalResults
 from agate.model import MODEL_OPTIONS
 from scipy.integrate import simpson
 from .static_settings import get_initial_solution, INITIAL_HEIGHT
-from .boundary_conditions import get_boundary_conditions_full
-
-
-def get_array_from_solution(solution_object, variable):
-    variables = {
-        "temperature": 0,
-        "temperature_derivative": 1,
-        "concentration": 2,
-        "hydrostatic_pressure": 3,
-        "frozen_gas_fraction": 4,
-        "mushy_layer_depth": 5,
-    }
-    if variable not in variables.keys():
-        raise ValueError(f"Invalid variable. Expected one of {variables.keys()}")
-
-    return solution_object.y[variables[variable]]
+from .boundary_conditions import get_boundary_conditions
 
 
 def ode_fun(non_dimensional_params, height, variables):
@@ -38,7 +23,7 @@ def solve(non_dimensional_params, max_nodes=1000):
 
     solution_object = solve_bvp(
         partial(ode_fun, non_dimensional_params),
-        partial(get_boundary_conditions_full, non_dimensional_params),
+        partial(get_boundary_conditions, non_dimensional_params),
         INITIAL_HEIGHT,
         get_initial_solution(non_dimensional_params.model_choice),
         max_nodes=max_nodes,
