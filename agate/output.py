@@ -2,7 +2,7 @@
 import numpy as np
 import json
 from dataclasses import asdict
-from agate.params import NonDimensionalParams
+from .params import NonDimensionalParams
 from .model import MODEL_OPTIONS
 
 GREY = "#BBBBBB"

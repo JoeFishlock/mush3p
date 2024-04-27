@@ -1,10 +1,7 @@
 from __future__ import annotations
-from typing import Protocol, Dict, Any
-import os
+from typing import Dict, Any
 import json
 from dataclasses import dataclass, asdict
-from scipy.integrate import solve_bvp
-from agate.model import MODEL_OPTIONS
 
 CELSIUS_TO_KELVIN = 273.15
 

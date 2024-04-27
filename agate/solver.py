@@ -1,9 +1,9 @@
 from functools import partial
 import numpy as np
-from scipy.integrate import solve_bvp
-from agate.output import NonDimensionalResults
-from agate.model import MODEL_OPTIONS
-from scipy.integrate import simpson
+from scipy.integrate import solve_bvp, simpson
+
+from .output import NonDimensionalResults
+from .model import MODEL_OPTIONS
 from .static_settings import get_initial_solution, INITIAL_HEIGHT
 from .boundary_conditions import get_boundary_conditions
 
