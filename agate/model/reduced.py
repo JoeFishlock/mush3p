@@ -16,6 +16,7 @@ from typing import Union, Any
 import numpy as np
 from numpy.typing import NDArray
 from .full import FullModel
+from ..static_settings import VOLUME_SUM_TOLERANCE
 
 Array = Union[NDArray, float]
 
@@ -121,10 +122,7 @@ class ReducedModel(FullModel):
         return far_dissolved_concentration_scaled * expansion_coefficient
 
     def check_volume_fractions_sum_to_one(self, solid_fraction, liquid_fraction):
-        if (
-            np.max(np.abs(solid_fraction + liquid_fraction - 1))
-            > self.VOLUME_SUM_TOLERANCE
-        ):
+        if np.max(np.abs(solid_fraction + liquid_fraction - 1)) > VOLUME_SUM_TOLERANCE:
             return False
         return True
 

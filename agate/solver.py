@@ -4,6 +4,7 @@ from scipy.integrate import solve_bvp
 from agate.output import NonDimensionalResults
 from agate.model import MODEL_OPTIONS
 from scipy.integrate import simpson
+from .static_settings import get_initial_solution, INITIAL_HEIGHT
 
 
 def get_array_from_solution(solution_object, variable):
@@ -40,11 +41,12 @@ def solve(non_dimensional_params, max_nodes=1000):
         )
 
     model = non_dimensional_params.create_model()
+    INITIAL_VARIABLES = get_initial_solution(non_dimensional_params.model_choice)
     solution_object = solve_bvp(
         partial(ode_fun, non_dimensional_params),
         partial(boundary_conditions, non_dimensional_params),
-        model.INITIAL_HEIGHT,
-        model.INITIAL_VARIABLES,
+        INITIAL_HEIGHT,
+        INITIAL_VARIABLES,
         max_nodes=max_nodes,
         verbose=0,
     )

@@ -16,41 +16,19 @@ from typing import Union, Any
 import numpy as np
 from scipy.optimize import fsolve  # type: ignore
 from numpy.typing import NDArray
+from ..static_settings import (
+    PORE_THROAT_SCALING,
+    DRAG_EXPONENT,
+    GAS_FRACTION_GUESS,
+    VOLUME_SUM_TOLERANCE,
+)
+
 
 Array = Union[NDArray, float]
 
 
 class FullModel:
     """Class containing full equations for system"""
-
-    # From Maus paper
-    PORE_THROAT_SCALING: float = 0.5
-    DRAG_EXPONENT: int = 6
-    GAS_FRACTION_GUESS: float = 0.01
-    # Initial Conditions for solver
-    INITIAL_MESH_NODES: int = 20
-    INITIAL_HEIGHT: NDArray = np.linspace(-1, 0, INITIAL_MESH_NODES)
-    INITIAL_TEMPERATURE: NDArray = np.linspace(0, -1, INITIAL_MESH_NODES)
-    INITIAL_TEMPERATURE_DERIVATIVE = np.full_like(INITIAL_TEMPERATURE, -1.0)
-    INITIAL_DISSOLVED_GAS_CONCENTRATION = np.linspace(0.8, 1.0, INITIAL_MESH_NODES)
-    INITIAL_HYDROSTATIC_PRESSURE = np.linspace(-0.1, 0, INITIAL_MESH_NODES)
-    INITIAL_FROZEN_GAS_FRACTION = np.full_like(INITIAL_TEMPERATURE, 0.02)
-    INITIAL_MUSHY_LAYER_DEPTH = np.full_like(INITIAL_TEMPERATURE, 1.5)
-
-    INITIAL_VARIABLES = np.vstack(
-        (
-            INITIAL_TEMPERATURE,
-            INITIAL_TEMPERATURE_DERIVATIVE,
-            INITIAL_DISSOLVED_GAS_CONCENTRATION,
-            INITIAL_HYDROSTATIC_PRESSURE,
-            INITIAL_FROZEN_GAS_FRACTION,
-            INITIAL_MUSHY_LAYER_DEPTH,
-        )
-    )
-
-    # Tolerances for error checking
-    DIFFERENCE_TOLERANCE = 1e-8
-    VOLUME_SUM_TOLERANCE = 1e-8
 
     def __init__(self, params) -> None:
         self.params = params
@@ -87,7 +65,7 @@ class FullModel:
         return liquid_fraction / (1 - solid_fraction)
 
     def calculate_bubble_radius(self, liquid_fraction: Array) -> Array:
-        exponent = self.PORE_THROAT_SCALING
+        exponent = PORE_THROAT_SCALING
         return self.params.bubble_radius_scaled / (liquid_fraction**exponent)
 
     def calculate_lag(self, bubble_radius: Array) -> Array:
@@ -96,7 +74,7 @@ class FullModel:
         return lag
 
     def calculate_drag(self, bubble_radius: Array) -> Array:
-        exponent = self.DRAG_EXPONENT
+        exponent = DRAG_EXPONENT
         drag = np.where(bubble_radius < 0, 1, (1 - bubble_radius) ** exponent)
         drag = np.where(bubble_radius > 1, 0, drag)
         return drag
@@ -170,7 +148,7 @@ class FullModel:
         # TODO: write a unit test to test gas_fraction is 0 when no dissolved gas present
         # <14-12-22, Joe Fishlock> #
 
-        initial_guess = np.full_like(solid_fraction, self.GAS_FRACTION_GUESS)
+        initial_guess = np.full_like(solid_fraction, GAS_FRACTION_GUESS)
         return fsolve(residual, initial_guess)
 
     def calculate_permeability(self, liquid_fraction: Array) -> Array:
@@ -309,7 +287,7 @@ class FullModel:
     ):
         if (
             np.max(np.abs(solid_fraction + liquid_fraction + gas_fraction - 1))
-            > self.VOLUME_SUM_TOLERANCE
+            > VOLUME_SUM_TOLERANCE
         ):
             return False
         return True

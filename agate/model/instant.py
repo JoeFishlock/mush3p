@@ -23,16 +23,6 @@ Array = Union[NDArray, float]
 class InstantNucleationModel(ReducedModel):
     """Class containing full equations for system"""
 
-    INITIAL_VARIABLES = np.vstack(
-        (
-            ReducedModel.INITIAL_TEMPERATURE,
-            ReducedModel.INITIAL_TEMPERATURE_DERIVATIVE,
-            ReducedModel.INITIAL_HYDROSTATIC_PRESSURE,
-            ReducedModel.INITIAL_FROZEN_GAS_FRACTION,
-            ReducedModel.INITIAL_MUSHY_LAYER_DEPTH,
-        )
-    )
-
     def __init__(self, params) -> None:
         self.params = params
 
@@ -116,11 +106,3 @@ class InstantNucleationModel(ReducedModel):
                 + mushy_layer_depth_at_bottom * self.params.far_temperature_scaled,
             ]
         )
-
-
-# TODO: use a setter to check small variation in results <03-01-23, Joe Fishlock> #
-# def check_variation_is_small(array):
-#     max_difference = np.max(np.abs(np.diff(array)))
-#     if max_difference > DIFFERENCE_TOLERANCE:
-#         return False
-#     return True
