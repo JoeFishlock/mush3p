@@ -17,6 +17,7 @@ import numpy as np
 from numpy.typing import NDArray
 from .full import FullModel
 from ..static_settings import VOLUME_SUM_TOLERANCE
+from .full_nonlinear_gas_fraction_solve import calculate_bubble_radius, calculate_drag
 
 Array = Union[NDArray, float]
 
@@ -24,225 +25,95 @@ Array = Union[NDArray, float]
 class ReducedModel(FullModel):
     """Class containing equations for reduced system"""
 
-    def calculate_liquid_darcy_velocity(self, temperature: Array) -> Array:
-        return np.zeros_like(temperature)
+    @property
+    def liquid_darcy_velocity(self) -> Array:
+        return np.zeros_like(self.temperature)
 
-    def calculate_solid_fraction(self, temperature: Array) -> Array:
+    @property
+    def solid_fraction(self) -> Array:
         concentration_ratio = self.params.concentration_ratio
-        return temperature / (temperature - concentration_ratio)
+        return self.temperature / (self.temperature - concentration_ratio)
 
-    def calculate_liquid_fraction(self, solid_fraction: Array) -> Array:
-        return 1 - solid_fraction
+    @property
+    def liquid_fraction(self) -> Array:
+        return 1 - self.solid_fraction
 
-    def calculate_gas_darcy_velocity(
+    @property
+    def gas_darcy_velocity(
         self,
-        gas_fraction: Array,
-        liquid_fraction: Array,
     ) -> Array:
-        bubble_radius = self.calculate_bubble_radius(liquid_fraction=liquid_fraction)
-        drag = self.calculate_drag(bubble_radius=bubble_radius)
+        bubble_radius = calculate_bubble_radius(self.liquid_fraction, self.params)
+        drag = calculate_drag(bubble_radius)
 
         buoyancy_term = self.params.stokes_rise_velocity_scaled * drag
 
-        return gas_fraction * buoyancy_term
+        return self.gas_fraction * buoyancy_term
 
-    def calculate_gas_density(
+    @property
+    def gas_density(
         self,
-        temperature: Array,
     ) -> Array:
-        return np.ones_like(temperature)
+        return np.ones_like(self.temperature)
 
-    def calculate_gas_fraction(
+    @property
+    def gas_fraction(
         self,
-        solid_fraction,
-        frozen_gas_fraction: Array,
-        gas_density: Array,
-        dissolved_gas_concentration: Array,
     ) -> Any:
         expansion_coefficient = self.params.expansion_coefficient
         far_dissolved_gas_concentration = self.params.far_dissolved_concentration_scaled
-        liquid_fraction = self.calculate_liquid_fraction(solid_fraction)
-        bubble_radius = self.calculate_bubble_radius(liquid_fraction=liquid_fraction)
+        bubble_radius = calculate_bubble_radius(self.liquid_fraction, self.params)
+        drag = calculate_drag(bubble_radius)
         numerator = expansion_coefficient * (
             far_dissolved_gas_concentration
-            - dissolved_gas_concentration * liquid_fraction
+            - self.dissolved_gas_concentration * self.liquid_fraction
         )
-        denominator = (
-            self.params.stokes_rise_velocity_scaled
-            * self.calculate_drag(bubble_radius=bubble_radius)
-            + 1
-        )
+        denominator = self.params.stokes_rise_velocity_scaled * drag + 1
         return numerator / denominator
 
-    def calculate_solid_fraction_derivative(
+    @property
+    def solid_fraction_derivative(
         self,
-        temperature: Array,
-        temperature_derivative: Array,
     ) -> Array:
         concentration_ratio = self.params.concentration_ratio
         return (
             -concentration_ratio
-            * temperature_derivative
-            / ((temperature - concentration_ratio) ** 2)
+            * self.temperature_derivative
+            / ((self.temperature - concentration_ratio) ** 2)
         )
 
-    def calculate_temperature_second_derivative(
+    @property
+    def hydrostatic_pressure_derivative(
         self,
-        temperature_derivative: Array,
-        mushy_layer_depth: Array,
-        solid_fraction_derivative: Array,
+    ) -> Array:
+        return np.zeros_like(self.temperature)
+
+    @property
+    def temperature_second_derivative(
+        self,
     ) -> Array:
         stefan_number = self.params.stefan_number
-        return mushy_layer_depth * (
-            temperature_derivative - stefan_number * solid_fraction_derivative
+        return self.mushy_layer_depth * (
+            self.temperature_derivative - stefan_number * self.solid_fraction_derivative
         )
 
-    def calculate_dissolved_gas_concentration_derivative(
+    @property
+    def dissolved_gas_concentration_derivative(
         self,
-        dissolved_gas_concentration: Array,
-        solid_fraction_derivative: Array,
-        solid_fraction: Array,
-        mushy_layer_depth,
-        nucleation_rate: Array,
     ) -> Array:
 
         damkholer_number = self.params.damkholer_number
-        dissolution = -damkholer_number * mushy_layer_depth * nucleation_rate
-        liquid_fraction = self.calculate_liquid_fraction(solid_fraction=solid_fraction)
+        dissolution = -damkholer_number * self.mushy_layer_depth * self.nucleation_rate
 
-        return (1 / liquid_fraction) * (
-            dissolved_gas_concentration * solid_fraction_derivative + dissolution
+        return (1 / self.liquid_fraction) * (
+            self.dissolved_gas_concentration * self.solid_fraction_derivative
+            + dissolution
         )
 
-    def calculate_frozen_gas_at_top(self) -> float:
-        expansion_coefficient = self.params.expansion_coefficient
-        far_dissolved_concentration_scaled = (
-            self.params.far_dissolved_concentration_scaled
-        )
-        return far_dissolved_concentration_scaled * expansion_coefficient
-
-    def check_volume_fractions_sum_to_one(self, solid_fraction, liquid_fraction):
-        if np.max(np.abs(solid_fraction + liquid_fraction - 1)) > VOLUME_SUM_TOLERANCE:
+    @property
+    def check_volume_fractions_sum_to_one(self):
+        if (
+            np.max(np.abs(self.solid_fraction + self.liquid_fraction - 1))
+            > VOLUME_SUM_TOLERANCE
+        ):
             return False
         return True
-
-    def ode_fun(self, height: Array, variables: Any) -> Any:
-        (
-            temperature,
-            temperature_derivative,
-            dissolved_gas_concentration,
-            hydrostatic_pressure,
-            frozen_gas_fraction,
-            mushy_layer_depth,
-        ) = variables
-
-        solid_fraction = self.calculate_solid_fraction(temperature=temperature)
-
-        solid_fraction_derivative = self.calculate_solid_fraction_derivative(
-            temperature=temperature,
-            temperature_derivative=temperature_derivative,
-        )
-
-        liquid_fraction = self.calculate_liquid_fraction(solid_fraction=solid_fraction)
-
-        nucleation_rate = self.calculate_nucleation_rate(
-            temperature=temperature,
-            dissolved_gas_concentration=dissolved_gas_concentration,
-        )
-
-        if not self.check_volume_fractions_sum_to_one(solid_fraction, liquid_fraction):
-            raise ValueError("Volume fractions do not sum to 1")
-
-        return np.vstack(
-            (
-                self.calculate_temperature_derivative(
-                    temperature_derivative=temperature_derivative
-                ),
-                self.calculate_temperature_second_derivative(
-                    temperature_derivative=temperature_derivative,
-                    mushy_layer_depth=mushy_layer_depth,
-                    solid_fraction_derivative=solid_fraction_derivative,
-                ),
-                self.calculate_dissolved_gas_concentration_derivative(
-                    dissolved_gas_concentration=dissolved_gas_concentration,
-                    solid_fraction_derivative=solid_fraction_derivative,
-                    solid_fraction=solid_fraction,
-                    mushy_layer_depth=mushy_layer_depth,
-                    nucleation_rate=nucleation_rate,
-                ),
-                self.calculate_zero_derivative(temperature=temperature),
-                self.calculate_zero_derivative(temperature=temperature),
-                self.calculate_zero_derivative(temperature=temperature),
-            )
-        )
-
-    def boundary_conditions(
-        self,
-        variables_at_bottom: Any,
-        variables_at_top: Any,
-    ) -> Array:
-        (
-            temperature_at_top,
-            _,
-            _,
-            hydrostatic_pressure_at_top,
-            frozen_gas_fraction_at_top,
-            _,
-        ) = variables_at_top
-        (
-            temperature_at_bottom,
-            temperature_derivative_at_bottom,
-            dissolved_gas_concentration_at_bottom,
-            _,
-            _,
-            mushy_layer_depth_at_bottom,
-        ) = variables_at_bottom
-
-        return np.array(
-            [
-                hydrostatic_pressure_at_top,
-                temperature_at_top + 1,
-                frozen_gas_fraction_at_top - self.calculate_frozen_gas_at_top(),
-                temperature_at_bottom,
-                dissolved_gas_concentration_at_bottom
-                - self.params.far_dissolved_concentration_scaled,
-                temperature_derivative_at_bottom
-                + mushy_layer_depth_at_bottom * self.params.far_temperature_scaled,
-            ]
-        )
-
-    def calculate_all_variables(
-        self,
-        temperature,
-        temperature_derivative,
-        dissolved_gas_concentration,
-        hydrostatic_pressure,
-        frozen_gas_fraction,
-        mushy_layer_depth,
-        height,
-    ):
-        solid_salinity = self.calculate_solid_salinity(temperature)
-        liquid_salinity = self.calculate_liquid_salinity(temperature)
-        solid_fraction = self.calculate_solid_fraction(temperature)
-        gas_density = self.calculate_gas_density(temperature)
-        gas_fraction = self.calculate_gas_fraction(
-            solid_fraction,
-            frozen_gas_fraction,
-            gas_density,
-            dissolved_gas_concentration,
-        )
-        liquid_fraction = self.calculate_liquid_fraction(solid_fraction)
-        liquid_darcy_velocity = self.calculate_liquid_darcy_velocity(temperature)
-        gas_darcy_velocity = self.calculate_gas_darcy_velocity(
-            gas_fraction=gas_fraction, liquid_fraction=liquid_fraction
-        )
-        return (
-            solid_salinity,
-            liquid_salinity,
-            solid_fraction,
-            liquid_fraction,
-            gas_fraction,
-            gas_density,
-            liquid_darcy_velocity,
-            gas_darcy_velocity,
-        )
