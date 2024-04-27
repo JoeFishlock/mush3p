@@ -6,9 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
 import scienceplots
 from tabulate import tabulate
-from agate.params import PhysicalParams
-from agate.solver import solve, calculate_RMSE
-from agate.output import shade_regions
+from agate import PhysicalParams, solve, shade_regions, calculate_RMSE
 
 plt.style.use(["science", "ieee", "grid"])
 
