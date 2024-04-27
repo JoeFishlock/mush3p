@@ -216,6 +216,3 @@ class NonDimensionalParams:
 
     def save(self, filename: str) -> None:
         json.dump(self.params, open(f"{filename}.json", "w"), indent=4)
-
-    def create_model(self):
-        return MODEL_OPTIONS[self.model_choice](self)
