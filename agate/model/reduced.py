@@ -1,5 +1,5 @@
 """
-The equations for solving the full model
+The equations for solving the reduced model
 
 All quantities are calculated from the smaller set of variables:
 temperature
@@ -14,52 +14,14 @@ height (vertical coordinate)
 
 from typing import Union, Any
 import numpy as np
-from scipy.optimize import fsolve  # type: ignore
 from numpy.typing import NDArray
+from .full import FullModel
 
 Array = Union[NDArray, float]
 
 
-class ReducedModel:
-    """Class containing full equations for system"""
-
-    # From Maus paper
-    PORE_THROAT_SCALING: float = 0.5
-    DRAG_EXPONENT: int = 6
-    GAS_FRACTION_GUESS: float = 0.01
-    # Initial Conditions for solver
-    INITIAL_MESH_NODES: int = 20
-    INITIAL_HEIGHT: NDArray = np.linspace(-1, 0, INITIAL_MESH_NODES)
-    INITIAL_TEMPERATURE: NDArray = np.linspace(0, -1, INITIAL_MESH_NODES)
-    INITIAL_TEMPERATURE_DERIVATIVE = np.full_like(INITIAL_TEMPERATURE, -1.0)
-    INITIAL_DISSOLVED_GAS_CONCENTRATION = np.linspace(0.8, 1.0, INITIAL_MESH_NODES)
-    INITIAL_HYDROSTATIC_PRESSURE = np.linspace(-0.1, 0, INITIAL_MESH_NODES)
-    INITIAL_FROZEN_GAS_FRACTION = np.full_like(INITIAL_TEMPERATURE, 0.02)
-    INITIAL_MUSHY_LAYER_DEPTH = np.full_like(INITIAL_TEMPERATURE, 1.5)
-
-    INITIAL_VARIABLES = np.vstack(
-        (
-            INITIAL_TEMPERATURE,
-            INITIAL_TEMPERATURE_DERIVATIVE,
-            INITIAL_DISSOLVED_GAS_CONCENTRATION,
-            INITIAL_HYDROSTATIC_PRESSURE,
-            INITIAL_FROZEN_GAS_FRACTION,
-            INITIAL_MUSHY_LAYER_DEPTH,
-        )
-    )
-
-    # Tolerances for error checking
-    DIFFERENCE_TOLERANCE = 1e-8
-    VOLUME_SUM_TOLERANCE = 1e-8
-
-    def __init__(self, params) -> None:
-        self.params = params
-
-    def calculate_solid_salinity(self, temperature: Array) -> Array:
-        return np.full_like(temperature, -self.params.concentration_ratio)
-
-    def calculate_liquid_salinity(self, temperature: Array) -> Array:
-        return -temperature
+class ReducedModel(FullModel):
+    """Class containing equations for reduced system"""
 
     def calculate_liquid_darcy_velocity(self, temperature: Array) -> Array:
         return np.zeros_like(temperature)
@@ -70,26 +32,6 @@ class ReducedModel:
 
     def calculate_liquid_fraction(self, solid_fraction: Array) -> Array:
         return 1 - solid_fraction
-
-    def calculate_liquid_saturation(
-        self, solid_fraction: Array, liquid_fraction: Array
-    ) -> Array:
-        return liquid_fraction / (1 - solid_fraction)
-
-    def calculate_bubble_radius(self, liquid_fraction: Array) -> Array:
-        exponent = self.PORE_THROAT_SCALING
-        return self.params.bubble_radius_scaled / (liquid_fraction**exponent)
-
-    def calculate_lag(self, bubble_radius: Array) -> Array:
-        lag = np.where(bubble_radius < 0, 1, 1 - 0.5 * bubble_radius)
-        lag = np.where(bubble_radius > 1, 0.5, lag)
-        return lag
-
-    def calculate_drag(self, bubble_radius: Array) -> Array:
-        exponent = self.DRAG_EXPONENT
-        drag = np.where(bubble_radius < 0, 1, (1 - bubble_radius) ** exponent)
-        drag = np.where(bubble_radius > 1, 0, drag)
-        return drag
 
     def calculate_gas_darcy_velocity(
         self,
@@ -131,36 +73,6 @@ class ReducedModel:
         )
         return numerator / denominator
 
-    def calculate_saturation_concentration(self, temperature: Array) -> Array:
-        return np.full_like(temperature, 1)
-
-    def calculate_unconstrained_nucleation_rate(
-        self, dissolved_gas_concentration: Array, saturation_concentration: Array
-    ) -> Array:
-        return dissolved_gas_concentration - saturation_concentration
-
-    def calculate_nucleation_indicator(
-        self, dissolved_gas_concentration: Array, saturation_concentration: Array
-    ) -> Array:
-        return np.where(dissolved_gas_concentration >= saturation_concentration, 1, 0)
-
-    def calculate_nucleation_rate(
-        self, temperature: Array, dissolved_gas_concentration: Array
-    ) -> Array:
-        saturation_concentration = self.calculate_saturation_concentration(
-            temperature=temperature
-        )
-        unconstrained_nucleation_rate = self.calculate_unconstrained_nucleation_rate(
-            dissolved_gas_concentration=dissolved_gas_concentration,
-            saturation_concentration=saturation_concentration,
-        )
-        nucleation_indicator = self.calculate_nucleation_indicator(
-            dissolved_gas_concentration=dissolved_gas_concentration,
-            saturation_concentration=saturation_concentration,
-        )
-
-        return nucleation_indicator * unconstrained_nucleation_rate
-
     def calculate_solid_fraction_derivative(
         self,
         temperature: Array,
@@ -172,12 +84,6 @@ class ReducedModel:
             * temperature_derivative
             / ((temperature - concentration_ratio) ** 2)
         )
-
-    def calculate_temperature_derivative(
-        self,
-        temperature_derivative: Array,
-    ) -> Array:
-        return temperature_derivative
 
     def calculate_temperature_second_derivative(
         self,
@@ -206,12 +112,6 @@ class ReducedModel:
         return (1 / liquid_fraction) * (
             dissolved_gas_concentration * solid_fraction_derivative + dissolution
         )
-
-    def calculate_zero_derivative(
-        self,
-        temperature: Array,
-    ) -> Array:
-        return np.zeros_like(temperature)
 
     def calculate_frozen_gas_at_top(self) -> float:
         expansion_coefficient = self.params.expansion_coefficient
