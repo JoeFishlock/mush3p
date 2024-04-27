@@ -1,3 +1,4 @@
+from functools import partial
 import numpy as np
 from scipy.integrate import solve_bvp
 from agate.output import NonDimensionalResults
@@ -20,6 +21,18 @@ def get_array_from_solution(solution_object, variable):
     return solution_object.y[variables[variable]]
 
 
+def ode_fun(non_dimensional_params, height, variables):
+    return MODEL_OPTIONS[non_dimensional_params.model_choice](
+        non_dimensional_params
+    ).ode_fun(height, variables)
+
+
+def boundary_conditions(non_dimensional_params, bottom, top):
+    return MODEL_OPTIONS[non_dimensional_params.model_choice](
+        non_dimensional_params
+    ).boundary_conditions(bottom, top)
+
+
 def solve(non_dimensional_params, max_nodes=1000):
     if non_dimensional_params.model_choice not in MODEL_OPTIONS.keys():
         raise ValueError(
@@ -28,8 +41,8 @@ def solve(non_dimensional_params, max_nodes=1000):
 
     model = non_dimensional_params.create_model()
     solution_object = solve_bvp(
-        model.ode_fun,
-        model.boundary_conditions,
+        partial(ode_fun, non_dimensional_params),
+        partial(boundary_conditions, non_dimensional_params),
         model.INITIAL_HEIGHT,
         model.INITIAL_VARIABLES,
         max_nodes=max_nodes,
@@ -84,10 +97,11 @@ def solve(non_dimensional_params, max_nodes=1000):
         height_array=height_array,
     )
 
+
 def calculate_RMSE(target_array, true_array, target_positions, true_positions):
     target = np.interp(true_positions, target_positions, target_array)
-    diff = (target - true_array) **2
-    normal = true_array ** 2
+    diff = (target - true_array) ** 2
+    normal = true_array**2
     numerator = simpson(diff, true_positions)
     denominator = simpson(normal, true_positions)
     """To test this function test easy one"""
@@ -95,11 +109,18 @@ def calculate_RMSE(target_array, true_array, target_positions, true_positions):
     # on = np.ones_like(x)
     # calculate_RMSE(x+1, on, x, x)
     """Answer should be sqrt(1/3)"""
-    return np.sqrt(numerator/denominator)
+    return np.sqrt(numerator / denominator)
+
 
 def compare_model_to_full(reduced_model_results: NonDimensionalResults):
     parameters = reduced_model_results.params
     parameters.model_choice = "full"
     base_results = solve(parameters)
-    print(calculate_RMSE(reduced_model_results.gas_fraction_array, base_results.gas_fraction_array, reduced_model_results.height_array, base_results.height_array))
-
+    print(
+        calculate_RMSE(
+            reduced_model_results.gas_fraction_array,
+            base_results.gas_fraction_array,
+            reduced_model_results.height_array,
+            base_results.height_array,
+        )
+    )
