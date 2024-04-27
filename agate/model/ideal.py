@@ -21,7 +21,7 @@ class IdealModel(FullModel):
     as all phases have the same thermal properties."""
 
     @property
-    def calculate_temperature_second_derivative(
+    def temperature_second_derivative(
         self,
     ):
         stefan_number = self.params.stefan_number
