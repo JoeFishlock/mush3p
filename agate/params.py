@@ -17,7 +17,7 @@ class PhysicalParams:
     initial_temperature: float = -2  # degC
     eutectic_temperature: float = -21  # deg C
     latent_heat: float = 333.4e3  # J/kg
-    specific_heat_capacity: float = 4209  # J/kg degC
+    liquid_specific_heat_capacity: float = 4209  # J/kg degC
     hele_shaw_gap_width: float = 1e-3  # m
     reference_permeability: float = 1e-8  # m2
     nucleation_time_scale: float = 250  # s
@@ -38,7 +38,7 @@ class PhysicalParams:
     @property
     def liquid_thermal_diffusivity(self) -> float:
         return self.liquid_thermal_conductivity / (
-            self.liquid_density * self.specific_heat_capacity
+            self.liquid_density * self.liquid_specific_heat_capacity
         )
 
     @property
@@ -91,7 +91,9 @@ class PhysicalParams:
     @property
     def stefan_number(self) -> float:
         temperature_diff = self.initial_temperature - self.eutectic_temperature
-        return self.latent_heat / (temperature_diff * self.specific_heat_capacity)
+        return self.latent_heat / (
+            temperature_diff * self.liquid_specific_heat_capacity
+        )
 
     @property
     def hele_shaw_permeability_scaled(self) -> float:
