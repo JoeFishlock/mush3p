@@ -30,6 +30,7 @@ class PhysicalParams:
     gravitational_acceleration: float = 9.81  # m/s2
     liquid_dynamic_viscosity: float = 1.906e-3  # kg/m s
     liquid_thermal_conductivity: float = 0.523  # W/m degC
+    solid_thermal_conductivity: float = 2.22  # W/m degC
     gas_thermal_conductivity: float = 2e-2  # W/m degC
     surface_tension: float = 77.09e-3  # N/m
     atmospheric_pressure: float = 1.01e5  # Pa
@@ -132,6 +133,10 @@ class PhysicalParams:
         return self.gas_thermal_conductivity / self.liquid_thermal_conductivity
 
     @property
+    def solid_conductivity_ratio(self) -> float:
+        return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
+
+    @property
     def hydrostatic_pressure_scale(self) -> float:
         return (
             self.liquid_density
@@ -169,6 +174,7 @@ class PhysicalParams:
             "bubble_radius_scaled": self.bubble_radius_scaled,
             "far_dissolved_concentration_scaled": self.far_dissolved_concentration_scaled,
             "gas_conductivity_ratio": self.gas_conductivity_ratio,
+            "solid_conductivity_ratio": self.solid_conductivity_ratio,
             "hydrostatic_pressure_scale": self.hydrostatic_pressure_scale,
             "laplace_pressure_scale": self.laplace_pressure_scale,
             "kelvin_conversion_temperature": self.kelvin_conversion_temperature,
@@ -187,6 +193,7 @@ class NonDimensionalParams:
     stefan_number: float
     hele_shaw_permeability_scaled: float
     far_temperature_scaled: float
+    solid_conductivity_ratio: float
 
     # gas params
     damkholer_number: float
