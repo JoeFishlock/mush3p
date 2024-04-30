@@ -18,6 +18,7 @@ class PhysicalParams:
     eutectic_temperature: float = -21  # deg C
     latent_heat: float = 333.4e3  # J/kg
     liquid_specific_heat_capacity: float = 4209  # J/kg degC
+    solid_specific_heat_capacity: float = 2108  # J/kg degC
     hele_shaw_gap_width: float = 1e-3  # m
     reference_permeability: float = 1e-8  # m2
     nucleation_time_scale: float = 250  # s
@@ -139,6 +140,10 @@ class PhysicalParams:
         return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
 
     @property
+    def solid_specific_heat_capacity_ratio(self) -> float:
+        return self.solid_specific_heat_capacity / self.liquid_specific_heat_capacity
+
+    @property
     def hydrostatic_pressure_scale(self) -> float:
         return (
             self.liquid_density
@@ -177,6 +182,7 @@ class PhysicalParams:
             "far_dissolved_concentration_scaled": self.far_dissolved_concentration_scaled,
             "gas_conductivity_ratio": self.gas_conductivity_ratio,
             "solid_conductivity_ratio": self.solid_conductivity_ratio,
+            "solid_specific_heat_capacity_ratio": self.solid_specific_heat_capacity_ratio,
             "hydrostatic_pressure_scale": self.hydrostatic_pressure_scale,
             "laplace_pressure_scale": self.laplace_pressure_scale,
             "kelvin_conversion_temperature": self.kelvin_conversion_temperature,
@@ -196,6 +202,7 @@ class NonDimensionalParams:
     hele_shaw_permeability_scaled: float
     far_temperature_scaled: float
     solid_conductivity_ratio: float
+    solid_specific_heat_capacity_ratio: float
 
     # gas params
     damkholer_number: float
