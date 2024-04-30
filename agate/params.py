@@ -1,10 +1,7 @@
 from __future__ import annotations
-from typing import Protocol, Dict, Any
-import os
+from typing import Dict, Any
 import json
 from dataclasses import dataclass, asdict
-from scipy.integrate import solve_bvp
-from agate.model import MODEL_OPTIONS
 
 CELSIUS_TO_KELVIN = 273.15
 
@@ -216,6 +213,3 @@ class NonDimensionalParams:
 
     def save(self, filename: str) -> None:
         json.dump(self.params, open(f"{filename}.json", "w"), indent=4)
-
-    def create_model(self):
-        return MODEL_OPTIONS[self.model_choice](self)

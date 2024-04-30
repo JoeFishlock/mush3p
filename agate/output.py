@@ -2,7 +2,8 @@
 import numpy as np
 import json
 from dataclasses import asdict
-from agate.params import NonDimensionalParams
+from .params import NonDimensionalParams
+from .model import MODEL_OPTIONS
 
 GREY = "#BBBBBB"
 
@@ -14,6 +15,7 @@ def shade_regions(list_of_axes, height):
         ax.axhspan(-1, bottom, facecolor="w", alpha=0)
         ax.axhspan(-1, 0, facecolor=GREY, alpha=0.2)
         ax.axhspan(0, top, facecolor="k", alpha=0.2)
+
 
 class NonDimensionalResults:
     """class to store non-dimensional results of a simulation"""
@@ -41,25 +43,35 @@ class NonDimensionalResults:
         self.height_array = np.array(height_array)
 
         # Calculate all mushy layer arrays
-        model = non_dimensional_parameters.create_model()
-        (
-            self.solid_salinity_array,
-            self.liquid_salinity_array,
-            self.solid_fraction_array,
-            self.liquid_fraction_array,
-            self.gas_fraction_array,
-            self.gas_density_array,
-            self.liquid_darcy_velocity_array,
-            self.gas_darcy_velocity_array,
-        ) = model.calculate_all_variables(
-            temperature=self.temperature_array,
-            temperature_derivative=self.temperature_derivative_array,
-            dissolved_gas_concentration=self.concentration_array,
-            hydrostatic_pressure=self.hydrostatic_pressure_array,
-            frozen_gas_fraction=self.frozen_gas_fraction,
-            mushy_layer_depth=self.mushy_layer_depth,
-            height=self.height_array,
-        )
+        if self.params.model_choice == "instant":
+            model = MODEL_OPTIONS[self.params.model_choice](
+                self.params,
+                self.height_array,
+                self.temperature_array,
+                self.temperature_derivative_array,
+                self.hydrostatic_pressure_array,
+                self.frozen_gas_fraction,
+                self.mushy_layer_depth,
+            )
+        else:
+            model = MODEL_OPTIONS[self.params.model_choice](
+                self.params,
+                self.height_array,
+                self.temperature_array,
+                self.temperature_derivative_array,
+                self.concentration_array,
+                self.hydrostatic_pressure_array,
+                self.frozen_gas_fraction,
+                self.mushy_layer_depth,
+            )
+        self.solid_salinity_array = model.solid_salinity
+        self.liquid_salinity_array = model.liquid_salinity
+        self.solid_fraction_array = model.solid_fraction
+        self.liquid_fraction_array = model.liquid_fraction
+        self.gas_fraction_array = model.gas_fraction
+        self.gas_density_array = model.gas_density
+        self.liquid_darcy_velocity_array = model.liquid_darcy_velocity
+        self.gas_darcy_velocity_array = model.gas_darcy_velocity
 
     def save(self, filename: str) -> None:
         data = {
