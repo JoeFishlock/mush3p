@@ -133,8 +133,10 @@ class FullModel:
             self.dissolved_gas_concentration >= self.saturation_concentration, 1, 0
         )
 
-        return indicator * (
-            self.dissolved_gas_concentration - self.saturation_concentration
+        return (
+            self.liquid_fraction
+            * indicator
+            * (self.dissolved_gas_concentration - self.saturation_concentration)
         )
 
     @property
