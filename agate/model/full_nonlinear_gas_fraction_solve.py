@@ -81,23 +81,22 @@ def calculate_gas_fraction(
             gas_fraction, frozen_gas_fraction
         )
         liquid_fraction = calculate_liquid_fraction(gas_fraction, solid_fraction)
-        bubble_radius = calculate_bubble_radius(liquid_fraction, non_dimensional_params)
-
-        buoyancy_term = (
-            non_dimensional_params.stokes_rise_velocity_scaled
-            * calculate_drag(bubble_radius)
-        )
-        liquid_term = (
-            2 * calculate_lag(bubble_radius) * liquid_darcy_velocity / liquid_fraction
+        gas_darcy_velocity = calculate_gas_darcy_velocity(
+            liquid_fraction, gas_fraction, frozen_gas_fraction, non_dimensional_params
         )
 
-        gas_darcy_velocity = gas_fraction * (buoyancy_term + liquid_term)
-
-        return (
-            gas_density * (gas_fraction + gas_darcy_velocity) / expansion_coefficient
-            + dissolved_gas_concentration * (liquid_fraction + liquid_darcy_velocity)
-            - far_dissolved_gas_concentration * (1 - frozen_gas_fraction)
+        gas_term = gas_density * (gas_fraction + gas_darcy_velocity)
+        dissolved_gas_term = (
+            expansion_coefficient
+            * dissolved_gas_concentration
+            * (liquid_fraction + liquid_darcy_velocity)
         )
+        boundary_term = (
+            expansion_coefficient
+            * far_dissolved_gas_concentration
+            * (1 - frozen_gas_fraction)
+        )
+        return gas_term + dissolved_gas_term - boundary_term
 
     # TODO: write a unit test to test gas_fraction is 0 when no dissolved gas present
     # <14-12-22, Joe Fishlock> #{data_path}/gas_fraction_model_error.pdf
