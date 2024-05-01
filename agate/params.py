@@ -19,6 +19,7 @@ class PhysicalParams:
     latent_heat: float = 333.4e3  # J/kg
     liquid_specific_heat_capacity: float = 4209  # J/kg degC
     solid_specific_heat_capacity: float = 2108  # J/kg degC
+    gas_specific_heat_capacity: float = 1004  # J/kg degC
     hele_shaw_gap_width: float = 1e-3  # m
     reference_permeability: float = 1e-8  # m2
     nucleation_time_scale: float = 250  # s
@@ -55,6 +56,10 @@ class PhysicalParams:
         return self.atmospheric_pressure / (
             self.specific_gas_constant * (self.initial_temperature + CELSIUS_TO_KELVIN)
         )
+
+    @property
+    def gas_density_ratio(self) -> float:
+        return self.reference_gas_density / self.liquid_density
 
     @property
     def stokes_rise_velocity(self) -> float:
@@ -144,6 +149,10 @@ class PhysicalParams:
         return self.solid_specific_heat_capacity / self.liquid_specific_heat_capacity
 
     @property
+    def gas_specific_heat_capacity_ratio(self) -> float:
+        return self.gas_specific_heat_capacity / self.liquid_specific_heat_capacity
+
+    @property
     def hydrostatic_pressure_scale(self) -> float:
         return (
             self.liquid_density
@@ -183,10 +192,12 @@ class PhysicalParams:
             "gas_conductivity_ratio": self.gas_conductivity_ratio,
             "solid_conductivity_ratio": self.solid_conductivity_ratio,
             "solid_specific_heat_capacity_ratio": self.solid_specific_heat_capacity_ratio,
+            "gas_specific_heat_capacity_ratio": self.gas_specific_heat_capacity_ratio,
             "hydrostatic_pressure_scale": self.hydrostatic_pressure_scale,
             "laplace_pressure_scale": self.laplace_pressure_scale,
             "kelvin_conversion_temperature": self.kelvin_conversion_temperature,
             "atmospheric_pressure_scaled": self.atmospheric_pressure_scaled,
+            "gas_density_ratio": self.gas_density_ratio,
         }
         return NonDimensionalParams(**non_dimensional_params)
 
@@ -203,6 +214,7 @@ class NonDimensionalParams:
     far_temperature_scaled: float
     solid_conductivity_ratio: float
     solid_specific_heat_capacity_ratio: float
+    gas_specific_heat_capacity_ratio: float
 
     # gas params
     damkholer_number: float
@@ -211,6 +223,7 @@ class NonDimensionalParams:
     bubble_radius_scaled: float
     far_dissolved_concentration_scaled: float
     gas_conductivity_ratio: float
+    gas_density_ratio: float
 
     # compressible gas params
     hydrostatic_pressure_scale: float

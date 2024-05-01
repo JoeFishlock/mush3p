@@ -161,45 +161,71 @@ class FullModel:
         return -self.mushy_layer_depth * self.liquid_darcy_velocity / self.permeability
 
     @property
-    def temperature_second_derivative(
-        self,
-    ) -> Array:
-        stefan_number = self.params.stefan_number
-        gas_conductivity_ratio = self.params.gas_conductivity_ratio
-        C = self.params.concentration_ratio
-        solid_conductivity_ratio = self.params.solid_conductivity_ratio
+    def effective_heat_capacity(self):
         solid_specific_heat_capacity_ratio = (
             self.params.solid_specific_heat_capacity_ratio
         )
+        gas_specific_heat_capacity_ratio = self.params.gas_specific_heat_capacity_ratio
+        density_ratio = self.params.gas_density_ratio
+        return (
+            1
+            - (1 - solid_specific_heat_capacity_ratio) * self.solid_fraction
+            - (1 - gas_specific_heat_capacity_ratio * density_ratio * self.gas_density)
+            * self.gas_fraction
+        )
 
-        effective_conductivity = (
+    @property
+    def effective_thermal_conductivity(self):
+        gas_conductivity_ratio = self.params.gas_conductivity_ratio
+        solid_conductivity_ratio = self.params.solid_conductivity_ratio
+        return (
             1
             - (1 - solid_conductivity_ratio) * self.solid_fraction
             - (1 - gas_conductivity_ratio) * self.gas_fraction
         )
 
-        heat_capacity_and_advection_term = (
-            1
-            - (1 - solid_specific_heat_capacity_ratio) * self.solid_fraction
-            - self.frozen_gas_fraction
-        )
-        modified_latent_heat = (
-            (stefan_number - (1 - solid_conductivity_ratio))
-            * C
-            * (1 - self.frozen_gas_fraction)
-            / ((C - self.temperature) ** 2)
-        )
-        gas_insulation = (
-            (1 - gas_conductivity_ratio)
-            * self.gas_fraction_derivative
-            / self.mushy_layer_depth
-        )
+    @property
+    def temperature_second_derivative(
+        self,
+    ) -> Array:
+        stefan_number = self.params.stefan_number
+        gas_specific_heat_capacity_ratio = self.params.gas_specific_heat_capacity_ratio
+        density_ratio = self.params.gas_density_ratio
+        gas_conductivity_ratio = self.params.gas_conductivity_ratio
+        solid_conductivity_ratio = self.params.solid_conductivity_ratio
 
-        return (
-            self.temperature_derivative
-            * self.mushy_layer_depth
-            * (heat_capacity_and_advection_term + modified_latent_heat + gas_insulation)
-            / effective_conductivity
+        heat_capacity_term = (
+            self.mushy_layer_depth
+            * self.effective_heat_capacity
+            * self.temperature_derivative
+        )
+        liquid_advection_term = (
+            self.mushy_layer_depth
+            * self.liquid_darcy_velocity
+            * self.temperature_derivative
+        )
+        gas_advection_term = (
+            self.mushy_layer_depth
+            * density_ratio
+            * self.gas_density
+            * gas_specific_heat_capacity_ratio
+            * self.gas_darcy_velocity
+            * self.temperature_derivative
+        )
+        latent_heat_term = (
+            -self.mushy_layer_depth * stefan_number * self.solid_fraction_derivative
+        )
+        conductivity_change_term = (
+            (1 - solid_conductivity_ratio) * self.solid_fraction_derivative
+            + (1 - gas_conductivity_ratio) * self.gas_fraction_derivative
+        ) * self.temperature_derivative
+
+        return (1 / self.effective_thermal_conductivity) * (
+            heat_capacity_term
+            + liquid_advection_term
+            + gas_advection_term
+            + latent_heat_term
+            + conductivity_change_term
         )
 
     @property
