@@ -9,7 +9,6 @@ def get_boundary_conditions(non_dimensional_params, bottom_variables, top_variab
     OPTIONS = {
         "full": BoundaryConditionsFull,
         "incompressible": BoundaryConditionsIncompressible,
-        "ideal": BoundaryConditionsFull,
         "reduced": BoundaryConditionsReduced,
         "instant": BoundaryConditionsInstant,
     }

@@ -88,12 +88,38 @@ class ReducedModel(FullModel):
         return np.zeros_like(self.temperature)
 
     @property
+    def effective_heat_capacity(self):
+        solid_specific_heat_capacity_ratio = (
+            self.params.solid_specific_heat_capacity_ratio
+        )
+        return 1 - (1 - solid_specific_heat_capacity_ratio) * self.solid_fraction
+
+    @property
+    def effective_thermal_conductivity(self):
+        solid_conductivity_ratio = self.params.solid_conductivity_ratio
+        return 1 - (1 - solid_conductivity_ratio) * self.solid_fraction
+
+    @property
     def temperature_second_derivative(
         self,
     ) -> Array:
         stefan_number = self.params.stefan_number
-        return self.mushy_layer_depth * (
-            self.temperature_derivative - stefan_number * self.solid_fraction_derivative
+        solid_conductivity_ratio = self.params.solid_conductivity_ratio
+
+        heat_capacity_term = (
+            self.mushy_layer_depth
+            * self.effective_heat_capacity
+            * self.temperature_derivative
+        )
+        latent_heat_term = (
+            -self.mushy_layer_depth * stefan_number * self.solid_fraction_derivative
+        )
+        conductivity_change_term = (
+            (1 - solid_conductivity_ratio) * self.solid_fraction_derivative
+        ) * self.temperature_derivative
+
+        return (1 / self.effective_thermal_conductivity) * (
+            heat_capacity_term + latent_heat_term + conductivity_change_term
         )
 
     @property

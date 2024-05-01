@@ -1,6 +1,5 @@
 from .full import FullModel
 from .incompressible import IncompressibleModel
-from .ideal import IdealModel
 from .reduced import ReducedModel
 from .instant import InstantNucleationModel
 
@@ -8,7 +7,6 @@ from .instant import InstantNucleationModel
 MODEL_OPTIONS = {
     "full": FullModel,
     "incompressible": IncompressibleModel,
-    "ideal": IdealModel,
     "reduced": ReducedModel,
     "instant": InstantNucleationModel,
 }
