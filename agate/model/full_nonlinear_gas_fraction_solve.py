@@ -23,8 +23,8 @@ def calculate_lag(bubble_radius):
 
 
 def calculate_drag(bubble_radius):
-    exponent = DRAG_EXPONENT
-    drag = np.where(bubble_radius < 0, 1, (1 - bubble_radius) ** exponent)
+    Hartholt_drag = lambda L: (1 - 1.5 * L + 1.5 * L**5 - L**6) / (1 + 1.5 * L**5)
+    drag = np.where(bubble_radius < 0, 1, Hartholt_drag(bubble_radius))
     drag = np.where(bubble_radius > 1, 0, drag)
     return drag
 
