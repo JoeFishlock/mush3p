@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "agate"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python package for running steady state simulations of mushy layers with bubbles"
 authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
 license = "MIT"
