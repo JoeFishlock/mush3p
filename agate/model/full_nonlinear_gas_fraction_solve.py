@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import fsolve
-from ..static_settings import GAS_FRACTION_GUESS, PORE_THROAT_SCALING, DRAG_EXPONENT
+from ..static_settings import GAS_FRACTION_GUESS
 
 
 def calculate_liquid_darcy_velocity(gas_fraction, frozen_gas_fraction):
@@ -11,9 +11,11 @@ def calculate_liquid_fraction(gas_fraction, solid_fraction):
     return 1 - solid_fraction - gas_fraction
 
 
-def calculate_bubble_radius(liquid_fraction, non_dimensional_params):
-    exponent = PORE_THROAT_SCALING
-    return non_dimensional_params.bubble_radius_scaled / (liquid_fraction**exponent)
+def calculate_bubble_radius(solid_fraction, non_dimensional_params):
+    exponent = non_dimensional_params.pore_throat_exponent
+    return non_dimensional_params.bubble_radius_scaled / (
+        (1 - solid_fraction) ** exponent
+    )
 
 
 def calculate_lag(bubble_radius):
@@ -29,23 +31,18 @@ def calculate_drag(bubble_radius):
     return drag
 
 
-def calculate_gas_darcy_velocity(
-    liquid_fraction, gas_fraction, frozen_gas_fraction, non_dimensional_params
-):
+def calculate_gas_darcy_velocity(solid_fraction, gas_fraction, non_dimensional_params):
+    exponent = non_dimensional_params.pore_throat_exponent
+    bubble_radius = calculate_bubble_radius(solid_fraction, non_dimensional_params)
+    drag = calculate_drag(bubble_radius)
 
-    bubble_radius = calculate_bubble_radius(liquid_fraction, non_dimensional_params)
-    liquid_darcy_velocity = calculate_liquid_darcy_velocity(
-        gas_fraction, frozen_gas_fraction
+    return (
+        gas_fraction
+        * non_dimensional_params.stokes_rise_velocity_scaled
+        * drag
+        * (bubble_radius**2)
+        * ((1 - solid_fraction) ** (2 * exponent))
     )
-
-    buoyancy_term = non_dimensional_params.stokes_rise_velocity_scaled * calculate_drag(
-        bubble_radius
-    )
-    liquid_term = (
-        2 * calculate_lag(bubble_radius) * liquid_darcy_velocity / liquid_fraction
-    )
-
-    return gas_fraction * (buoyancy_term + liquid_term)
 
 
 def calculate_gas_density(
@@ -82,7 +79,7 @@ def calculate_gas_fraction(
         )
         liquid_fraction = calculate_liquid_fraction(gas_fraction, solid_fraction)
         gas_darcy_velocity = calculate_gas_darcy_velocity(
-            liquid_fraction, gas_fraction, frozen_gas_fraction, non_dimensional_params
+            solid_fraction, gas_fraction, non_dimensional_params
         )
 
         gas_term = gas_density * (gas_fraction + gas_darcy_velocity)

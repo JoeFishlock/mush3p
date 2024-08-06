@@ -39,17 +39,6 @@ class ReducedModel(FullModel):
         return 1 - self.solid_fraction
 
     @property
-    def gas_darcy_velocity(
-        self,
-    ) -> Array:
-        bubble_radius = calculate_bubble_radius(self.liquid_fraction, self.params)
-        drag = calculate_drag(bubble_radius)
-
-        buoyancy_term = self.params.stokes_rise_velocity_scaled * drag
-
-        return self.gas_fraction * buoyancy_term
-
-    @property
     def gas_density(
         self,
     ) -> Array:
@@ -60,14 +49,17 @@ class ReducedModel(FullModel):
         self,
     ) -> Any:
         expansion_coefficient = self.params.expansion_coefficient
+        exponent = self.params.pore_throat_exponent
         far_dissolved_gas_concentration = self.params.far_dissolved_concentration_scaled
-        bubble_radius = calculate_bubble_radius(self.liquid_fraction, self.params)
+        bubble_radius = calculate_bubble_radius(self.solid_fraction, self.params)
         drag = calculate_drag(bubble_radius)
         numerator = expansion_coefficient * (
             far_dissolved_gas_concentration
             - self.dissolved_gas_concentration * self.liquid_fraction
         )
-        denominator = self.params.stokes_rise_velocity_scaled * drag + 1
+        denominator = 1 + self.params.stokes_rise_velocity_scaled * drag * (
+            bubble_radius**2
+        ) * ((1 - self.solid_fraction) ** (2 * exponent))
         return numerator / denominator
 
     @property

@@ -6,10 +6,6 @@ VOLUME_SUM_TOLERANCE = 1e-8
 
 GAS_FRACTION_GUESS: float = 0.01
 
-# From Maus paper
-PORE_THROAT_SCALING: float = 0.5
-DRAG_EXPONENT: int = 6
-
 # Initial Conditions for solver
 INITIAL_MESH_NODES: int = 20
 INITIAL_HEIGHT: NDArray = np.linspace(-1, 0, INITIAL_MESH_NODES)

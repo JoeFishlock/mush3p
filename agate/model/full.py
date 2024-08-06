@@ -79,9 +79,8 @@ class FullModel:
         self,
     ) -> Array:
         return calculate_gas_darcy_velocity(
-            self.liquid_fraction,
+            self.solid_fraction,
             self.gas_fraction,
-            self.frozen_gas_fraction,
             self.params,
         )
 

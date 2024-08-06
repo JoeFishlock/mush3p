@@ -29,6 +29,7 @@ class PhysicalParams:
     reference_velocity: float = 3e-6  # m/s
     bubble_radius: float = 1e-3  # m
     reference_pore_scale: float = 1e-3  # m
+    pore_throat_exponent: float = 0.46
     gravitational_acceleration: float = 9.81  # m/s2
     liquid_dynamic_viscosity: float = 1.906e-3  # kg/m s
     liquid_thermal_conductivity: float = 0.523  # W/m degC
@@ -60,14 +61,6 @@ class PhysicalParams:
     @property
     def gas_density_ratio(self) -> float:
         return self.reference_gas_density / self.liquid_density
-
-    @property
-    def stokes_rise_velocity(self) -> float:
-        return (
-            self.liquid_density
-            * self.gravitational_acceleration
-            * self.bubble_radius**2
-        ) / (3 * self.liquid_dynamic_viscosity)
 
     @property
     def pressure_scale(self) -> float:
@@ -123,7 +116,11 @@ class PhysicalParams:
 
     @property
     def stokes_rise_velocity_scaled(self) -> float:
-        return self.stokes_rise_velocity / self.reference_velocity
+        return (
+            self.liquid_density
+            * self.gravitational_acceleration
+            * self.reference_pore_scale**2
+        ) / (3 * self.liquid_dynamic_viscosity * self.reference_velocity)
 
     @property
     def bubble_radius_scaled(self) -> float:
@@ -188,6 +185,7 @@ class PhysicalParams:
             "expansion_coefficient": self.expansion_coefficient,
             "stokes_rise_velocity_scaled": self.stokes_rise_velocity_scaled,
             "bubble_radius_scaled": self.bubble_radius_scaled,
+            "pore_throat_exponent": self.pore_throat_exponent,
             "far_dissolved_concentration_scaled": self.far_dissolved_concentration_scaled,
             "gas_conductivity_ratio": self.gas_conductivity_ratio,
             "solid_conductivity_ratio": self.solid_conductivity_ratio,
@@ -221,6 +219,7 @@ class NonDimensionalParams:
     expansion_coefficient: float
     stokes_rise_velocity_scaled: float
     bubble_radius_scaled: float
+    pore_throat_exponent: float
     far_dissolved_concentration_scaled: float
     gas_conductivity_ratio: float
     gas_density_ratio: float
