@@ -45,7 +45,7 @@ colorbar = [
     "#662506",
     "k",
 ]
-for bubble_radius in np.linspace(1e-4, 1e-3, 10):
+for bubble_radius in np.linspace(1e-5, 2e-4, 10):
     parameters = PhysicalParams(
         name=f"radius{bubble_radius:.0e}", model_choice="reduced"
     )
