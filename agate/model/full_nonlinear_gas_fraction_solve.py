@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import fsolve
-from ..static_settings import GAS_FRACTION_GUESS
+from ..static_settings import GAS_FRACTION_GUESS, HARTHOLT_DRAG_FUNCTION
 
 
 def calculate_liquid_darcy_velocity(gas_fraction, frozen_gas_fraction):
@@ -25,8 +25,7 @@ def calculate_lag(bubble_radius):
 
 
 def calculate_drag(bubble_radius):
-    Hartholt_drag = lambda L: (1 - 1.5 * L + 1.5 * L**5 - L**6) / (1 + 1.5 * L**5)
-    drag = np.where(bubble_radius < 0, 1, Hartholt_drag(bubble_radius))
+    drag = np.where(bubble_radius < 0, 1, HARTHOLT_DRAG_FUNCTION(bubble_radius))
     drag = np.where(bubble_radius > 1, 0, drag)
     return drag
 
