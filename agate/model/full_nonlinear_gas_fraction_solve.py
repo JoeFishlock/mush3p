@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import fsolve
+from ..params import NonDimensionalParams
 from ..static_settings import GAS_FRACTION_GUESS, HARTHOLT_DRAG_FUNCTION
 
 
@@ -63,39 +63,33 @@ def calculate_gas_density(
 def calculate_gas_fraction(
     frozen_gas_fraction,
     solid_fraction,
+    temperature,
     dissolved_gas_concentration,
     gas_density,
-    non_dimensional_params,
+    non_dimensional_params: NonDimensionalParams,
 ):
     expansion_coefficient = non_dimensional_params.expansion_coefficient
     far_dissolved_gas_concentration = (
         non_dimensional_params.far_dissolved_concentration_scaled
     )
+    concentration_ratio = non_dimensional_params.concentration_ratio
+    buoyancy = non_dimensional_params.stokes_rise_velocity_scaled
+    bubble_scale = non_dimensional_params.bubble_radius_scaled
 
-    def residual(gas_fraction):
-        liquid_darcy_velocity = calculate_liquid_darcy_velocity(
-            gas_fraction, frozen_gas_fraction
-        )
-        liquid_fraction = calculate_liquid_fraction(gas_fraction, solid_fraction)
-        gas_darcy_velocity = calculate_gas_darcy_velocity(
-            solid_fraction, gas_fraction, non_dimensional_params
-        )
+    drag = calculate_drag(
+        calculate_bubble_radius(solid_fraction, non_dimensional_params)
+    )
 
-        gas_term = gas_density * (gas_fraction + gas_darcy_velocity)
-        dissolved_gas_term = (
-            expansion_coefficient
-            * dissolved_gas_concentration
-            * (liquid_fraction + liquid_darcy_velocity)
+    numerator = (
+        expansion_coefficient
+        * (1 - frozen_gas_fraction)
+        * (
+            far_dissolved_gas_concentration
+            - dissolved_gas_concentration
+            * (concentration_ratio / (concentration_ratio - temperature))
         )
-        boundary_term = (
-            expansion_coefficient
-            * far_dissolved_gas_concentration
-            * (1 - frozen_gas_fraction)
-        )
-        return gas_term + dissolved_gas_term - boundary_term
+    )
+    interstitial_gas_velocity = drag * buoyancy * bubble_scale**2
+    denominator = gas_density * (1 + interstitial_gas_velocity)
 
-    # TODO: write a unit test to test gas_fraction is 0 when no dissolved gas present
-    # <14-12-22, Joe Fishlock> #{data_path}/gas_fraction_model_error.pdf
-
-    initial_guess = np.full_like(solid_fraction, GAS_FRACTION_GUESS)
-    return fsolve(residual, initial_guess)
+    return numerator / denominator

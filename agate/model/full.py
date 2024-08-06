@@ -103,6 +103,7 @@ class FullModel:
         return calculate_gas_fraction(
             self.frozen_gas_fraction,
             self.solid_fraction,
+            self.temperature,
             self.dissolved_gas_concentration,
             self.gas_density,
             self.params,

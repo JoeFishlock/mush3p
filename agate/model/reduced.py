@@ -17,7 +17,9 @@ import numpy as np
 from numpy.typing import NDArray
 from .full import FullModel
 from ..static_settings import VOLUME_SUM_TOLERANCE
-from .full_nonlinear_gas_fraction_solve import calculate_bubble_radius, calculate_drag
+from .full_nonlinear_gas_fraction_solve import (
+    calculate_gas_fraction,
+)
 
 Array = Union[NDArray, float]
 
@@ -48,19 +50,14 @@ class ReducedModel(FullModel):
     def gas_fraction(
         self,
     ) -> Any:
-        expansion_coefficient = self.params.expansion_coefficient
-        exponent = self.params.pore_throat_exponent
-        far_dissolved_gas_concentration = self.params.far_dissolved_concentration_scaled
-        bubble_radius = calculate_bubble_radius(self.solid_fraction, self.params)
-        drag = calculate_drag(bubble_radius)
-        numerator = expansion_coefficient * (
-            far_dissolved_gas_concentration
-            - self.dissolved_gas_concentration * self.liquid_fraction
+        return calculate_gas_fraction(
+            0,
+            self.solid_fraction,
+            self.temperature,
+            self.dissolved_gas_concentration,
+            1,
+            self.params,
         )
-        denominator = 1 + self.params.stokes_rise_velocity_scaled * drag * (
-            bubble_radius**2
-        ) * ((1 - self.solid_fraction) ** (2 * exponent))
-        return numerator / denominator
 
     @property
     def solid_fraction_derivative(
