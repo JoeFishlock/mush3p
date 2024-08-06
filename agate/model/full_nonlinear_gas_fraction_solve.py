@@ -1,6 +1,6 @@
 import numpy as np
 from ..params import NonDimensionalParams
-from ..static_settings import GAS_FRACTION_GUESS, HARTHOLT_DRAG_FUNCTION
+from ..static_settings import HARTHOLT_DRAG_FUNCTION
 
 
 def calculate_liquid_darcy_velocity(gas_fraction, frozen_gas_fraction):
@@ -31,16 +31,16 @@ def calculate_drag(bubble_radius):
 
 
 def calculate_gas_darcy_velocity(solid_fraction, gas_fraction, non_dimensional_params):
-    exponent = non_dimensional_params.pore_throat_exponent
-    bubble_radius = calculate_bubble_radius(solid_fraction, non_dimensional_params)
-    drag = calculate_drag(bubble_radius)
+    bubble_scale = non_dimensional_params.bubble_radius_scaled
+    drag = calculate_drag(
+        calculate_bubble_radius(solid_fraction, non_dimensional_params)
+    )
 
     return (
         gas_fraction
         * non_dimensional_params.stokes_rise_velocity_scaled
         * drag
-        * (bubble_radius**2)
-        * ((1 - solid_fraction) ** (2 * exponent))
+        * bubble_scale**2
     )
 
 

@@ -4,8 +4,6 @@ from numpy.typing import NDArray
 # Tolerances for error checking
 VOLUME_SUM_TOLERANCE = 1e-8
 
-GAS_FRACTION_GUESS: float = 0.01
-
 # Wall drag enhancement factor 1/K1 from hartholt et al 1994
 def HARTHOLT_DRAG_FUNCTION(L):
     return (1 - 1.4567 * L + 1.4567 * L**5 - L**6) / (1 + 1.4567 * L**5)
