@@ -1,9 +1,8 @@
-# Agate #
+# mush3p #
 
 ## Installation ##
-Agate so far has been developed in Python 3.9.13.
 Run the command `pip install /path/to/this/directory/`.
-This installs the necessary dependencies and allows agate to be imported.
+This installs the necessary dependencies and allows mush3p to be imported.
 
 ## Usage ##
 

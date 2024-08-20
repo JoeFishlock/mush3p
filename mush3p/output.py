@@ -5,17 +5,6 @@ from dataclasses import asdict
 from .params import NonDimensionalParams
 from .model import MODEL_OPTIONS
 
-GREY = "#BBBBBB"
-
-
-def shade_regions(list_of_axes, height):
-    for ax in list_of_axes:
-        bottom = np.min(height)
-        top = np.max(height)
-        ax.axhspan(-1, bottom, facecolor="w", alpha=0)
-        ax.axhspan(-1, 0, facecolor=GREY, alpha=0.2)
-        ax.axhspan(0, top, facecolor="k", alpha=0.2)
-
 
 class NonDimensionalResults:
     """class to store non-dimensional results of a simulation"""
