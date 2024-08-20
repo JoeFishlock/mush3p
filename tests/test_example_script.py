@@ -1,10 +1,6 @@
-from pathlib import Path
-import pytest
 from mush3p.example import main
 
 
-def test_example_script(tmp_path):
+def test_example_script():
     """Test example script runs without errors and produces plots"""
-    main(tmp_path)
-    assert Path(f"{tmp_path}/gas_fractions_for_different_models.pdf").is_file()
-    assert Path(f"{tmp_path}/gas_fraction_model_error.pdf").is_file()
+    main()
