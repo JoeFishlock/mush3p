@@ -1,6 +1,6 @@
 from pathlib import Path
 import pytest
-from agate.example import main
+from mush3p.example import main
 
 
 def test_example_script(tmp_path):

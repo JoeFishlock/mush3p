@@ -1,5 +1,5 @@
 from pytest import approx
-from agate.params import PhysicalParams
+from mush3p.params import PhysicalParams
 
 
 def test_concentration_ratio() -> None:
