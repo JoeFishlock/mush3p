@@ -1,4 +1,3 @@
-"""Class for storing simulation output"""
 import numpy as np
 import json
 from dataclasses import asdict
@@ -7,7 +6,45 @@ from .model import MODEL_OPTIONS
 
 
 class NonDimensionalResults:
-    """class to store non-dimensional results of a simulation"""
+    """Class to store non-dimensional solution profiles and provide methods to linearly
+    interpolate them with depth.
+
+    The class also provides a save method to serialize the non-dimensional parameters
+    and solution arrays to a JSON file, and a load method to deserialize them back into
+    a NonDimensionalResults object.
+
+    The class calcualtes all mushy layer arrays using the model specified in the
+    non-dimensional parameters.
+
+    Args:
+        non_dimensional_parameters (NonDimensionalParams): Non-dimensional parameters
+        temperature_array (np.ndarray): Temperature profile
+        temperature_derivative_array (np.ndarray): Temperature derivative profile
+        concentration_array (np.ndarray): Concentration profile
+        hydrostatic_pressure_array (np.ndarray): Hydrostatic pressure profile
+        frozen_gas_fraction (float): Frozen gas fraction
+        mushy_layer_depth (float): Mushy layer depth
+        height_array (np.ndarray): Vertical grid points.
+
+    Attributes:
+        name (str): Name of the simulation
+        params (NonDimensionalParams): Non-dimensional parameters
+        temperature_array (np.ndarray): Temperature profile
+        temperature_derivative_array (np.ndarray): Temperature derivative profile
+        concentration_array (np.ndarray): Concentration profile
+        hydrostatic_pressure_array (np.ndarray): Hydrostatic pressure profile
+        frozen_gas_fraction (float): Frozen gas fraction
+        mushy_layer_depth (float): Mushy layer depth
+        height_array (np.ndarray): Vertical grid points
+        solid_salinity_array (np.ndarray): Solid salinity profile
+        liquid_salinity_array (np.ndarray): Liquid salinity profile
+        solid_fraction_array (np.ndarray): Solid fraction profile
+        liquid_fraction_array (np.ndarray): Liquid fraction profile
+        gas_fraction_array (np.ndarray): Gas fraction profile
+        gas_density_array (np.ndarray): Gas density profile
+        liquid_darcy_velocity_array (np.ndarray): Liquid Darcy velocity profile
+        gas_darcy_velocity_array (np.ndarray): Gas Darcy velocity profile
+    """
 
     def __init__(
         self,
