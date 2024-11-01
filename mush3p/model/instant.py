@@ -11,26 +11,39 @@ mushy_layer_depth
 height (vertical coordinate)
 """
 
-from typing import Union, Any
+from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 from .reduced import ReducedModel
-
-Array = Union[NDArray, float]
+from ..params import NonDimensionalParams
 
 
 class InstantNucleationModel(ReducedModel):
-    """Class containing equations for system"""
+    """Implements the equations to solve the instant model.
+
+    This is an extension of the reduced model where the nucleation rate is infinite and
+    and so any supersaturations is immediately converted to the gas phase.
+    This means we do not need to solve the ODE for dissolved gas concentration in this
+    case.
+
+    Args:
+        params (NonDimensionalParams): Non-dimensional parameters
+        height (NDArray): Height values
+        temperature (NDArray): Temperature values
+        temperature_derivative (NDArray): Temperature derivative values
+        hydrostatic_pressure (NDArray): Hydrostatic pressure values
+        frozen_gas_fraction (NDArray): Frozen gas fraction
+        mushy_layer_depth (NDArray): Mushy layer depth"""
 
     def __init__(
         self,
-        params,
-        height,
-        temperature,
-        temperature_derivative,
-        hydrostatic_pressure,
-        frozen_gas_fraction,
-        mushy_layer_depth,
+        params: NonDimensionalParams,
+        height: NDArray,
+        temperature: NDArray,
+        temperature_derivative: NDArray,
+        hydrostatic_pressure: NDArray,
+        frozen_gas_fraction: NDArray,
+        mushy_layer_depth: NDArray,
     ) -> None:
         self.params = params
         self.height = height

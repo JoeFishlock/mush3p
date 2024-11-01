@@ -1,23 +1,10 @@
-"""
-The equations for solving the full model
-
-All quantities are calculated from the smaller set of variables:
-temperature
-temperature_derivative
-dissolved_gas_concentration
-hydrostatic_pressure
-frozen_gas_fraction
-mushy_layer_depth
-
-height (vertical coordinate)
-"""
-
-from typing import Union, Any
+from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 from ..static_settings import (
     VOLUME_SUM_TOLERANCE,
 )
+from ..params import NonDimensionalParams
 from .full_nonlinear_gas_fraction_solve import (
     calculate_gas_fraction,
     calculate_gas_darcy_velocity,
@@ -27,22 +14,35 @@ from .full_nonlinear_gas_fraction_solve import (
 )
 
 
-Array = Union[NDArray, float]
-
-
 class FullModel:
-    """Class containing full equations for system"""
+    """Implement the full model equations and provide the ode_fun method to be used by
+    scipy solve_BVP.
+
+    The gas fraction is calculated by solving a non-linear equation and is fully coupled
+    to the liquid darcy flux.
+    Solid, liquid and gas fractions sum to one.
+    Gas density is calculated from the ideal gas law.
+
+    Args:
+        params (NonDimensionalParams): Non-dimensional parameters
+        height (NDArray): Height values
+        temperature (NDArray): Temperature values
+        temperature_derivative (NDArray): Temperature derivative values
+        dissolved_gas_concentration (NDArray): Dissolved gas concentration values
+        hydrostatic_pressure (NDArray): Hydrostatic pressure values
+        frozen_gas_fraction (NDArray): Frozen gas fraction
+        mushy_layer_depth (NDArray): Mushy layer depth"""
 
     def __init__(
         self,
-        params,
-        height,
-        temperature,
-        temperature_derivative,
-        dissolved_gas_concentration,
-        hydrostatic_pressure,
-        frozen_gas_fraction,
-        mushy_layer_depth,
+        params: NonDimensionalParams,
+        height: NDArray,
+        temperature: NDArray,
+        temperature_derivative: NDArray,
+        dissolved_gas_concentration: NDArray,
+        hydrostatic_pressure: NDArray,
+        frozen_gas_fraction: NDArray,
+        mushy_layer_depth: NDArray,
     ) -> None:
         self.params = params
         self.height = height
@@ -54,15 +54,15 @@ class FullModel:
         self.mushy_layer_depth = mushy_layer_depth
 
     @property
-    def solid_salinity(self) -> Array:
+    def solid_salinity(self) -> NDArray:
         return np.full_like(self.temperature, -self.params.concentration_ratio)
 
     @property
-    def liquid_salinity(self) -> Array:
+    def liquid_salinity(self) -> NDArray:
         return -self.temperature
 
     @property
-    def solid_fraction(self) -> Array:
+    def solid_fraction(self) -> NDArray:
         concentration_ratio = self.params.concentration_ratio
         return (
             -(1 - self.frozen_gas_fraction)
@@ -71,13 +71,13 @@ class FullModel:
         )
 
     @property
-    def liquid_fraction(self) -> Array:
+    def liquid_fraction(self) -> NDArray:
         return calculate_liquid_fraction(self.gas_fraction, self.solid_fraction)
 
     @property
     def gas_darcy_velocity(
         self,
-    ) -> Array:
+    ) -> NDArray:
         return calculate_gas_darcy_velocity(
             self.solid_fraction,
             self.gas_fraction,
@@ -116,7 +116,7 @@ class FullModel:
         )
 
     @property
-    def permeability(self) -> Array:
+    def permeability(self) -> NDArray:
         liquid_permeability_reciprocal = (
             1 - self.liquid_fraction
         ) ** 2 / self.liquid_fraction**3
@@ -124,11 +124,11 @@ class FullModel:
         return ((1 / reference) + liquid_permeability_reciprocal) ** (-1)
 
     @property
-    def saturation_concentration(self) -> Array:
+    def saturation_concentration(self) -> NDArray:
         return np.full_like(self.temperature, 1)
 
     @property
-    def nucleation_rate(self) -> Array:
+    def nucleation_rate(self) -> NDArray:
         indicator = np.where(
             self.dissolved_gas_concentration >= self.saturation_concentration, 1, 0
         )
@@ -142,7 +142,7 @@ class FullModel:
     @property
     def solid_fraction_derivative(
         self,
-    ) -> Array:
+    ) -> NDArray:
         concentration_ratio = self.params.concentration_ratio
         return (
             -concentration_ratio
@@ -152,14 +152,14 @@ class FullModel:
         )
 
     @property
-    def gas_fraction_derivative(self) -> Array:
+    def gas_fraction_derivative(self) -> NDArray:
         """Numerically approximate the derivative with finite difference."""
         return np.gradient(self.gas_fraction, self.height)
 
     @property
     def hydrostatic_pressure_derivative(
         self,
-    ) -> Array:
+    ) -> NDArray:
         return -self.mushy_layer_depth * self.liquid_darcy_velocity / self.permeability
 
     @property
@@ -189,7 +189,7 @@ class FullModel:
     @property
     def temperature_second_derivative(
         self,
-    ) -> Array:
+    ) -> NDArray:
         stefan_number = self.params.stefan_number
         gas_specific_heat_capacity_ratio = self.params.gas_specific_heat_capacity_ratio
         density_ratio = self.params.gas_density_ratio
@@ -233,7 +233,7 @@ class FullModel:
     @property
     def dissolved_gas_concentration_derivative(
         self,
-    ) -> Array:
+    ) -> NDArray:
 
         damkholer_number = self.params.damkholer_number
         freezing = self.dissolved_gas_concentration * self.solid_fraction_derivative
