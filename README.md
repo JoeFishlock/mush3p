@@ -4,6 +4,8 @@ Mush3p is a Python package which simulate a steadily solidifying three-phase mus
 The liquid, which contains dissolved solute and gas, is translated upwards at a constant velocity towards a cold heat exhanger at the eutectic temperature of the system.
 The problem set up and underlying conservation equations are detailed in an upcoming paper [To be added here].
 Here is an example of a simulation of the gas fraction distribution in a steady mushy layer at different values of the concentration ratio dimensionless parameter.
+
+
 ![Simulation of three-phase mushy layers at different concentration ratios from an upcoming paper](example_plot.svg)
 
 ## Installation ##
