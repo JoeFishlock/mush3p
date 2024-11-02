@@ -123,7 +123,7 @@ class NonDimensionalResults:
 
     def liquid_salinity(self, height):
         return np.interp(
-            height, self.height_array, self.liquid_salinity_array, right=np.NaN
+            height, self.height_array, self.liquid_salinity_array, right=np.nan
         )
 
     def temperature(self, height):
@@ -146,12 +146,12 @@ class NonDimensionalResults:
 
     def concentration(self, height):
         return np.interp(
-            height, self.height_array, self.concentration_array, right=np.NaN
+            height, self.height_array, self.concentration_array, right=np.nan
         )
 
     def hydrostatic_pressure(self, height):
         return np.interp(
-            height, self.height_array, self.hydrostatic_pressure_array, right=np.NaN
+            height, self.height_array, self.hydrostatic_pressure_array, right=np.nan
         )
 
     def solid_fraction(self, height):
@@ -176,7 +176,7 @@ class NonDimensionalResults:
 
     def liquid_darcy_velocity(self, height):
         return np.interp(
-            height, self.height_array, self.liquid_darcy_velocity_array, right=np.NaN
+            height, self.height_array, self.liquid_darcy_velocity_array, right=np.nan
         )
 
     def gas_darcy_velocity(self, height):
@@ -184,12 +184,12 @@ class NonDimensionalResults:
             height,
             self.height_array,
             self.gas_darcy_velocity_array,
-            left=np.NaN,
+            left=np.nan,
             right=0,
         )
 
     def gas_density(self, height):
         gas_density_filtered = np.where(
-            self.gas_fraction_array <= 0, np.NaN, self.gas_density_array
+            self.gas_fraction_array <= 0, np.nan, self.gas_density_array
         )
-        return np.interp(height, self.height_array, gas_density_filtered, left=np.NaN)
+        return np.interp(height, self.height_array, gas_density_filtered, left=np.nan)
