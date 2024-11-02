@@ -67,5 +67,9 @@ In brief there are four options for the `model_choice` parameter:
 The tests directory contains tests of simulations for a variety of input parameters.
 Run the tests using `pytest` from the root directory of the repository.
 
+## Docs ##
+API reference documentation built using `mkdocs gh-deploy` is available at
+[documentation](https://JoeFishlock.github.io/mush3p).
+
 ## License ##
 [MIT](https://choosealicense.com/licenses/mit/)

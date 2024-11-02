@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mush3p"
-version = "1.0.0"
+version = "1.0.1"
 description = "Simulate steady solidification of a three-phase mushy layer"
 authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
 license = "MIT"
