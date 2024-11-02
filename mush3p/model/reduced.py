@@ -1,50 +1,35 @@
-"""
-The equations for solving the reduced model
-
-All quantities are calculated from the smaller set of variables:
-temperature
-temperature_derivative
-dissolved_gas_concentration
-hydrostatic_pressure
-frozen_gas_fraction
-mushy_layer_depth
-
-height (vertical coordinate)
-"""
-
-from typing import Union, Any
+from typing import Any
 import numpy as np
 from numpy.typing import NDArray
-from .full import FullModel
+
+from .incompressible import IncompressibleModel
 from ..static_settings import VOLUME_SUM_TOLERANCE
 from .full_nonlinear_gas_fraction_solve import (
     calculate_gas_fraction,
 )
 
-Array = Union[NDArray, float]
 
+class ReducedModel(IncompressibleModel):
+    """Implement the equations for the reduced model
 
-class ReducedModel(FullModel):
-    """Class containing equations for reduced system"""
+    The reduced model is an approximation to the full model where the exsolved gas
+    volume fraction is small and incompressible.
+    Under this approximation scheme the solid and liquid volume fractions sum to 1
+    and the exsolution of gas does not drive a liquid flow.
+    """
 
     @property
-    def liquid_darcy_velocity(self) -> Array:
+    def liquid_darcy_velocity(self) -> NDArray:
         return np.zeros_like(self.temperature)
 
     @property
-    def solid_fraction(self) -> Array:
+    def solid_fraction(self) -> NDArray:
         concentration_ratio = self.params.concentration_ratio
         return self.temperature / (self.temperature - concentration_ratio)
 
     @property
-    def liquid_fraction(self) -> Array:
+    def liquid_fraction(self) -> NDArray:
         return 1 - self.solid_fraction
-
-    @property
-    def gas_density(
-        self,
-    ) -> Array:
-        return np.ones_like(self.temperature)
 
     @property
     def gas_fraction(
@@ -62,7 +47,7 @@ class ReducedModel(FullModel):
     @property
     def solid_fraction_derivative(
         self,
-    ) -> Array:
+    ) -> NDArray:
         concentration_ratio = self.params.concentration_ratio
         return (
             -concentration_ratio
@@ -73,7 +58,7 @@ class ReducedModel(FullModel):
     @property
     def hydrostatic_pressure_derivative(
         self,
-    ) -> Array:
+    ) -> NDArray:
         return np.zeros_like(self.temperature)
 
     @property
@@ -91,7 +76,7 @@ class ReducedModel(FullModel):
     @property
     def temperature_second_derivative(
         self,
-    ) -> Array:
+    ) -> NDArray:
         stefan_number = self.params.stefan_number
         solid_conductivity_ratio = self.params.solid_conductivity_ratio
 
@@ -114,7 +99,7 @@ class ReducedModel(FullModel):
     @property
     def dissolved_gas_concentration_derivative(
         self,
-    ) -> Array:
+    ) -> NDArray:
 
         damkholer_number = self.params.damkholer_number
         dissolution = -damkholer_number * self.mushy_layer_depth * self.nucleation_rate

@@ -1,0 +1,8 @@
+site_name: mush3p
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - mkdocstrings

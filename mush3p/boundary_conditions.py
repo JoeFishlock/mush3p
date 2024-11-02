@@ -1,11 +1,29 @@
-# need to find a way to calculate gas_fraction and gas_density from state variables
 import numpy as np
+from numpy.typing import NDArray
 from .model.full_nonlinear_gas_fraction_solve import (
     calculate_gas_density as calculate_full_gas_density,
 )
+from .params import NonDimensionalParams
 
 
-def get_boundary_conditions(non_dimensional_params, bottom_variables, top_variables):
+def get_boundary_conditions(
+    non_dimensional_params: NonDimensionalParams,
+    bottom_variables: NDArray,
+    top_variables: NDArray,
+) -> NDArray:
+    """Function to return the boundary conditions for scipy solve_BVP.
+
+    The returned array is zero when the boundary conditions are satisfied.
+
+    Args:
+        non_dimensional_params (NonDimensionalParams): Non-dimensional parameters
+        bottom_variables (NDArray): Array of the solution variables evaluated at the bottom boundary.
+        top_variables (NDArray): Array of the solution variables evaluated at the top boundary.
+
+    Returns:
+        NDArray: residual of the boundary conditions
+    """
+
     OPTIONS = {
         "full": BoundaryConditionsFull,
         "incompressible": BoundaryConditionsIncompressible,
@@ -17,6 +35,8 @@ def get_boundary_conditions(non_dimensional_params, bottom_variables, top_variab
     ).boundary_conditions
 
 
+# The boundary conditions for each model are implemented as a class which must implement
+# the boundary_conditions method
 class BoundaryConditionsFull:
     def __init__(self, non_dimensional_params, bottom_variables, top_variables):
         self.non_dimensional_params = non_dimensional_params

@@ -1,20 +1,26 @@
 [tool.poetry]
 name = "mush3p"
-version = "0.3.3"
-description = "Python package for running steady state simulations of mushy layers with bubbles"
+version = "1.0.0"
+description = "Simulate steady solidification of a three-phase mushy layer"
 authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-numpy = "^1.26.4"
-scipy = "^1.13.0"
+python = "^3.12"
+numpy = "^2.1"
+scipy = "^1.14"
 
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^8.1.2"
 
+
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6.1"
+mkdocstrings-python = "^1.12.2"
+mkdocs-material = "^9.5.43"
 
 [build-system]
 requires = ["poetry-core"]
