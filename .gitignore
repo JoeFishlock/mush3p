@@ -10,3 +10,4 @@ figures/*
 build/*
 dist/*
 *egg-info**
+site/
